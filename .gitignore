@@ -1,0 +1,12 @@
+# Git Ignore File 
+
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# Node.js
+node_modules/
+
+# Environment variables
+.env
