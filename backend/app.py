@@ -2,8 +2,10 @@ from flask import Flask, jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 from datetime import datetime
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 # Configure SQLite database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///rallyrank.db'
@@ -158,14 +160,22 @@ def add_game():
 @app.route('/games', methods=['GET'])
 def get_games():
     games = Game.query.all()
-    return jsonify([{
-        "player1_id": game.player1_id,
-        "player2_id": game.player2_id,
-        "player1_score": game.player1_score,
-        "player2_score": game.player2_score,
-        "result": game.result,
-        "timestamp": game.timestamp
-    } for game in games]), 200
+    game_data = []
+
+    for game in games:
+        player1 = Player.query.get(game.player1_id)
+        player2 = Player.query.get(game.player2_id)
+        game_data.append({
+            "id": game.id,
+            "player1_name": player1.name,
+            "player2_name": player2.name,
+            "player1_score": game.player1_score,
+            "player2_score": game.player2_score,
+            "result": game.result,
+            "timestamp": game.timestamp
+        })
+
+    return jsonify(game_data), 200
 
 # Get game history for a specific player
 @app.route('/games/player/<int:player_id>', methods=['GET'])
