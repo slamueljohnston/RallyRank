@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URL for the Flask backend
-const API_BASE_URL = 'http://127.0.0.1:5000';
+const API_BASE_URL = 'https://rallyrank.onrender.com';
 
 // Fetch player rankings
 export const getRankings = async () => {
@@ -30,5 +30,25 @@ export const getGameHistory = async () => {
     return response.data;
   } catch (error) {
     console.error('Error fetching game history:', error);
+  }
+};
+
+// Add new player
+export const addPlayer = async (player) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/players`, player);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding player:', error);
+  }
+};
+
+// Add new game result
+export const addGameResult = async (game) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/games`, game);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding game result:', error);
   }
 };
