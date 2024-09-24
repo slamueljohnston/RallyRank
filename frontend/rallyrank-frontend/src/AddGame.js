@@ -21,12 +21,25 @@ const AddGame = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Convert scores to integers before submitting
+    const player1ScoreInt = parseInt(player1Score, 10);
+    const player2ScoreInt = parseInt(player2Score, 10);
+
+    // Ensure the scores are valid integers
+    if (isNaN(player1ScoreInt) || isNaN(player2ScoreInt)) {
+      alert('Scores must be valid integers.');
+      return;
+    }
+
     await addGameResult({
       player1_id: player1,
       player2_id: player2,
-      player1_score: player1Score,
-      player2_score: player2Score,
+      player1_score: player1ScoreInt,
+      player2_score: player2ScoreInt,
     });
+
+    // Navigate back to the homepage after submitting
     navigate('/');
   };
 
@@ -45,7 +58,11 @@ const AddGame = () => {
         </select>
 
         <label>Player 1 Score:</label>
-        <input type="number" value={player1Score} onChange={(e) => setPlayer1Score(e.target.value)} />
+        <input
+          type="number"
+          value={player1Score}
+          onChange={(e) => setPlayer1Score(e.target.value)}  // Score is entered as a string, so we need to convert it
+        />
 
         <label>Player 2:</label>
         <select value={player2} onChange={(e) => setPlayer2(e.target.value)}>
@@ -58,7 +75,11 @@ const AddGame = () => {
         </select>
 
         <label>Player 2 Score:</label>
-        <input type="number" value={player2Score} onChange={(e) => setPlayer2Score(e.target.value)} />
+        <input
+          type="number"
+          value={player2Score}
+          onChange={(e) => setPlayer2Score(e.target.value)}  // Convert to integer later
+        />
 
         <button type="submit">Submit</button>
       </form>
