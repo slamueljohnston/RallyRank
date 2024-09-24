@@ -97,15 +97,17 @@ def add_game():
             logging.error("A player cannot play against themselves")
             return jsonify({"error": "A player cannot play against themselves"}), 400
 
-        # Ensure scores are valid (positive integers)
-        player1_score = data['player1_score']
-        player2_score = data['player2_score']
+        # Convert scores to integers and handle conversion errors
+        try:
+            player1_score = int(data['player1_score'])
+            player2_score = int(data['player2_score'])
+        except ValueError:
+            logging.error("Scores must be valid integers")
+            return jsonify({"error": "Scores must be valid integers"}), 400
 
         logging.debug(f"Player 1 score: {player1_score}, Player 2 score: {player2_score}")
 
-        if not isinstance(player1_score, int) or not isinstance(player2_score, int):
-            logging.error("Scores must be valid integers")
-            return jsonify({"error": "Scores must be valid integers"}), 400
+        # Ensure scores are valid (positive integers)
         if player1_score < 0 or player2_score < 0:
             logging.error("Scores must be positive integers")
             return jsonify({"error": "Scores must be positive integers"}), 400
