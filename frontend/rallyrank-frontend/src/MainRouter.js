@@ -1,18 +1,16 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';  // No need to import BrowserRouter here
 import AddGame from './AddGame';
 import AddPlayer from './AddPlayer';
-import App from './App';  // The existing App.js
+import App from './App';
 
 function MainRouter() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<App />} />         {/* Main Page */}
-        <Route path="/add-game" element={<AddGame />} />  {/* Add Game Form */}
-        <Route path="/add-player" element={<AddPlayer />} />  {/* Add Player Form */}
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path="/" element={<App />} />
+      <Route path="/add-game" element={<AddGame />} />
+      <Route path="/add-player" element={<AddPlayer />} />
+    </Routes>
   );
 }
 
