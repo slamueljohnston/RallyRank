@@ -3,9 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 from datetime import datetime
 from flask_cors import CORS
+import logging
+from sqlalchemy.exc import SQLAlchemyError
 
 app = Flask(__name__)
 CORS(app)
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
 
 # Configure SQLite database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///rallyrank.db'
@@ -78,82 +83,93 @@ def get_rankings():
 # Submit game results
 @app.route('/games', methods=['POST'])
 def add_game():
-    data = request.get_json()
-    
-    # Check if the required fields are in the request
-    if not data or 'player1_id' not in data or 'player2_id' not in data or 'player1_score' not in data or 'player2_score' not in data:
-        return jsonify({"error": "Invalid input: player IDs and scores are required"}), 400
-    
-    # Prevent players from playing against themselves
-    if data['player1_id'] == data['player2_id']:
-        return jsonify({"error": "A player cannot play against themselves"}), 400
-    
-    # Ensure scores are valid (positive integers)
-    if not isinstance(data['player1_score'], int) or not isinstance(data['player2_score'], int):
-        return jsonify({"error": "Scores must be valid integers"}), 400
-    if data['player1_score'] < 0 or data['player2_score'] < 0:
-        return jsonify({"error": "Scores must be positive integers"}), 400
-    
-    # Fetch players from the database
-    player1 = Player.query.get(data['player1_id'])
-    player2 = Player.query.get(data['player2_id'])
-    if not player1 or not player2:
-        return jsonify({"error": "Player not found"}), 404
+    try:
+        data = request.get_json()
 
-    # Calculate the result based on scores
-    player1_score = data['player1_score']
-    player2_score = data['player2_score']
-    
-    if player1_score > player2_score:
-        result = 'player1_win'
-        score1 = 1  # player1 wins
-        score2 = 0  # player2 loses
-    elif player2_score > player1_score:
-        result = 'player2_win'
-        score1 = 0  # player1 loses
-        score2 = 1  # player2 wins
-    else:
-        result = 'draw'
-        score1 = score2 = 0.5  # draw scenario
+        # Check if the required fields are in the request
+        if not data or 'player1_id' not in data or 'player2_id' not in data or 'player1_score' not in data or 'player2_score' not in data:
+            return jsonify({"error": "Invalid input: player IDs and scores are required"}), 400
 
-    # Elo rating calculation (same logic as before)
-    K = 32  # K-factor
-    rating_diff = player2.rating - player1.rating
-    expected_score1 = 1 / (1 + 10 ** (rating_diff / 400))
-    expected_score2 = 1 - expected_score1
+        # Prevent players from playing against themselves
+        if data['player1_id'] == data['player2_id']:
+            return jsonify({"error": "A player cannot play against themselves"}), 400
 
-    # Margin multiplier (same as before)
-    score_diff = abs(player1_score - player2_score)
-    margin_multiplier = (score_diff + 1) / 20
+        # Ensure scores are valid (positive integers)
+        if not isinstance(data['player1_score'], int) or not isinstance(data['player2_score'], int):
+            return jsonify({"error": "Scores must be valid integers"}), 400
+        if data['player1_score'] < 0 or data['player2_score'] < 0:
+            return jsonify({"error": "Scores must be positive integers"}), 400
 
-    # Update player ratings
-    player1.rating += K * margin_multiplier * (score1 - expected_score1)
-    player2.rating += K * margin_multiplier * (score2 - expected_score2)
+        # Fetch players from the database
+        player1 = Player.query.get(data['player1_id'])
+        player2 = Player.query.get(data['player2_id'])
+        if not player1 or not player2:
+            return jsonify({"error": "Player not found"}), 404
 
-    # Create and store the game record
-    new_game = Game(
-        player1_id=player1.id,
-        player2_id=player2.id,
-        player1_score=player1_score,
-        player2_score=player2_score,
-        result=result
-    )
-    db.session.add(new_game)
-    db.session.commit()
+        # Calculate the result based on scores
+        player1_score = data['player1_score']
+        player2_score = data['player2_score']
 
-    return jsonify({
-        "id": new_game.id,
-        "player1_id": new_game.player1_id,
-        "player2_id": new_game.player2_id,
-        "player1_score": new_game.player1_score,
-        "player2_score": new_game.player2_score,
-        "result": new_game.result,
-        "timestamp": new_game.timestamp,
-        "new_ratings": {
-            "player1": player1.rating,
-            "player2": player2.rating
-        }
-    }), 201
+        if player1_score > player2_score:
+            result = 'player1_win'
+            score1 = 1  # player1 wins
+            score2 = 0  # player2 loses
+        elif player2_score > player1_score:
+            result = 'player2_win'
+            score1 = 0  # player1 loses
+            score2 = 1  # player2 wins
+        else:
+            result = 'draw'
+            score1 = score2 = 0.5  # draw scenario
+
+        # Elo rating calculation
+        K = 32  # K-factor
+        rating_diff = player2.rating - player1.rating
+        expected_score1 = 1 / (1 + 10 ** (rating_diff / 400))
+        expected_score2 = 1 - expected_score1
+
+        # Margin multiplier
+        score_diff = abs(player1_score - player2_score)
+        margin_multiplier = (score_diff + 1) / 20
+
+        # Update player ratings
+        player1.rating += K * margin_multiplier * (score1 - expected_score1)
+        player2.rating += K * margin_multiplier * (score2 - expected_score2)
+
+        # Create and store the game record
+        new_game = Game(
+            player1_id=player1.id,
+            player2_id=player2.id,
+            player1_score=player1_score,
+            player2_score=player2_score,
+            result=result
+        )
+
+        db.session.add(new_game)
+        db.session.commit()
+
+        return jsonify({
+            "id": new_game.id,
+            "player1_id": new_game.player1_id,
+            "player2_id": new_game.player2_id,
+            "player1_score": new_game.player1_score,
+            "player2_score": new_game.player2_score,
+            "result": new_game.result,
+            "timestamp": new_game.timestamp,
+            "new_ratings": {
+                "player1": player1.rating,
+                "player2": player2.rating
+            }
+        }), 201
+
+    except SQLAlchemyError as e:
+        logging.error(f"Database error: {e}")
+        db.session.rollback()  # Rollback the transaction on error
+        return jsonify({"error": "Internal server error"}), 500
+
+    except Exception as e:
+        logging.error(f"Error adding game: {e}")
+        return jsonify({"error": "Internal server error"}), 500
 
 # Get all games
 @app.route('/games', methods=['GET'])
