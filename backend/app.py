@@ -14,24 +14,23 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialize the database
 db = SQLAlchemy(app)
 
-# Define the Player model (table)
+# Define models (Player, Game, etc.)
 class Player(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(80), nullable = False)
-    rating = db.Column(db.Integer, default = 1000)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
+    rating = db.Column(db.Integer, default=1000)
 
-# Define the Game model (table)
 class Game(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    player1_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable = False)
-    player2_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable = False)
+    id = db.Column(db.Integer, primary_key=True)
+    player1_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
+    player2_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
     player1_score = db.Column(db.Integer, nullable=False)
     player2_score = db.Column(db.Integer, nullable=False)
-    result = db.Column(db.String(10), nullable=False)  # Who won (e.g., 'player1_win')
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    result = db.Column(db.String(10), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False)
 
-# Create the tables
-@app.before_first_request
+# Create tables before handling the first request
+@app.before_request
 def create_tables():
     db.create_all()
 
@@ -216,6 +215,11 @@ def get_player_stats(player_id):
         "wins": wins,
         "losses": losses
     }), 200
+
+# Define routes (e.g., /players, /games, etc.)
+@app.route('/')
+def home():
+    return "Hello, World!"
 
 if __name__ == '__main__':
     app.run(debug=True)
