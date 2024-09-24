@@ -32,7 +32,7 @@ class Game(db.Model):
     player1_score = db.Column(db.Integer, nullable=False)
     player2_score = db.Column(db.Integer, nullable=False)
     result = db.Column(db.String(10), nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False)
+    timestamp = db.Column(db.DateTime, default = datetime.now, nullable=False)
 
 # Create tables before handling the first request
 @app.before_request
