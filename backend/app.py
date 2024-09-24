@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import or_
 from datetime import datetime
 
 app = Flask(__name__)
@@ -46,7 +47,6 @@ def get_player(player_id):
         return jsonify({"error": "Player not found"}), 404
     return jsonify({"id": player.id, "name": player.name, "rating": player.rating}), 200
 
-
 # Add a new player
 @app.route('/players', methods=['POST'])
 def add_player():
@@ -78,9 +78,21 @@ def get_rankings():
 @app.route('/games', methods=['POST'])
 def add_game():
     data = request.get_json()
+    
+    # Check if the required fields are in the request
     if not data or 'player1_id' not in data or 'player2_id' not in data or 'player1_score' not in data or 'player2_score' not in data:
-        return jsonify({"error": "Invalid input"}), 400
-
+        return jsonify({"error": "Invalid input: player IDs and scores are required"}), 400
+    
+    # Prevent players from playing against themselves
+    if data['player1_id'] == data['player2_id']:
+        return jsonify({"error": "A player cannot play against themselves"}), 400
+    
+    # Ensure scores are valid (positive integers)
+    if not isinstance(data['player1_score'], int) or not isinstance(data['player2_score'], int):
+        return jsonify({"error": "Scores must be valid integers"}), 400
+    if data['player1_score'] < 0 or data['player2_score'] < 0:
+        return jsonify({"error": "Scores must be positive integers"}), 400
+    
     # Fetch players from the database
     player1 = Player.query.get(data['player1_id'])
     player2 = Player.query.get(data['player2_id'])
@@ -103,15 +115,15 @@ def add_game():
         result = 'draw'
         score1 = score2 = 0.5  # draw scenario
 
-    # Elo rating calculation
-    K = 32  # K-factor, can be adjusted
+    # Elo rating calculation (same logic as before)
+    K = 32  # K-factor
     rating_diff = player2.rating - player1.rating
     expected_score1 = 1 / (1 + 10 ** (rating_diff / 400))
     expected_score2 = 1 - expected_score1
 
-    # Calculate margin of victory factor (to enhance Elo change)
+    # Margin multiplier (same as before)
     score_diff = abs(player1_score - player2_score)
-    margin_multiplier = (score_diff + 1) / 20  # scaling factor, can be adjusted
+    margin_multiplier = (score_diff + 1) / 20
 
     # Update player ratings
     player1.rating += K * margin_multiplier * (score1 - expected_score1)
@@ -142,6 +154,58 @@ def add_game():
         }
     }), 201
 
+# Get all games
+@app.route('/games', methods=['GET'])
+def get_games():
+    games = Game.query.all()
+    return jsonify([{
+        "player1_id": game.player1_id,
+        "player2_id": game.player2_id,
+        "player1_score": game.player1_score,
+        "player2_score": game.player2_score,
+        "result": game.result,
+        "timestamp": game.timestamp
+    } for game in games]), 200
+
+# Get game history for a specific player
+@app.route('/games/player/<int:player_id>', methods=['GET'])
+def get_player_games(player_id):
+    games = Game.query.filter((Game.player1_id == player_id) | (Game.player2_id == player_id)).all()
+    return jsonify([{
+        "player1_id": game.player1_id,
+        "player2_id": game.player2_id,
+        "player1_score": game.player1_score,
+        "player2_score": game.player2_score,
+        "result": game.result,
+        "timestamp": game.timestamp
+    } for game in games]), 200
+
+# Get player profile and stats
+@app.route('/players/<int:player_id>/stats', methods=['GET'])
+def get_player_stats(player_id):
+    player = Player.query.get(player_id)
+    if not player:
+        return jsonify({"error": "Player not found"}), 404
+
+    # Count total games played
+    games_played = Game.query.filter(or_(Game.player1_id == player_id, Game.player2_id == player_id)).count()
+
+    # Count total wins (either as player1 or player2)
+    wins = Game.query.filter(or_(
+        (Game.player1_id == player_id) & (Game.result == 'player1_win'),
+        (Game.player2_id == player_id) & (Game.result == 'player2_win')
+    )).count()
+
+    # Calculate losses
+    losses = games_played - wins
+
+    return jsonify({
+        "name": player.name,
+        "rating": player.rating,
+        "games_played": games_played,
+        "wins": wins,
+        "losses": losses
+    }), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
