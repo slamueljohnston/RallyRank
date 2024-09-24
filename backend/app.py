@@ -85,31 +85,39 @@ def get_rankings():
 def add_game():
     try:
         data = request.get_json()
+        logging.debug(f"Received data: {data}")
 
         # Check if the required fields are in the request
         if not data or 'player1_id' not in data or 'player2_id' not in data or 'player1_score' not in data or 'player2_score' not in data:
+            logging.error("Invalid input: player IDs and scores are required")
             return jsonify({"error": "Invalid input: player IDs and scores are required"}), 400
 
         # Prevent players from playing against themselves
         if data['player1_id'] == data['player2_id']:
+            logging.error("A player cannot play against themselves")
             return jsonify({"error": "A player cannot play against themselves"}), 400
 
         # Ensure scores are valid (positive integers)
-        if not isinstance(data['player1_score'], int) or not isinstance(data['player2_score'], int):
+        player1_score = data['player1_score']
+        player2_score = data['player2_score']
+
+        logging.debug(f"Player 1 score: {player1_score}, Player 2 score: {player2_score}")
+
+        if not isinstance(player1_score, int) or not isinstance(player2_score, int):
+            logging.error("Scores must be valid integers")
             return jsonify({"error": "Scores must be valid integers"}), 400
-        if data['player1_score'] < 0 or data['player2_score'] < 0:
+        if player1_score < 0 or player2_score < 0:
+            logging.error("Scores must be positive integers")
             return jsonify({"error": "Scores must be positive integers"}), 400
 
         # Fetch players from the database
         player1 = Player.query.get(data['player1_id'])
         player2 = Player.query.get(data['player2_id'])
         if not player1 or not player2:
+            logging.error("Player not found")
             return jsonify({"error": "Player not found"}), 404
 
         # Calculate the result based on scores
-        player1_score = data['player1_score']
-        player2_score = data['player2_score']
-
         if player1_score > player2_score:
             result = 'player1_win'
             score1 = 1  # player1 wins
@@ -122,6 +130,8 @@ def add_game():
             result = 'draw'
             score1 = score2 = 0.5  # draw scenario
 
+        logging.debug(f"Game result: {result}")
+
         # Elo rating calculation
         K = 32  # K-factor
         rating_diff = player2.rating - player1.rating
@@ -132,9 +142,14 @@ def add_game():
         score_diff = abs(player1_score - player2_score)
         margin_multiplier = (score_diff + 1) / 20
 
+        logging.debug(f"Elo calculation: Player 1 expected score: {expected_score1}, Player 2 expected score: {expected_score2}")
+        logging.debug(f"Margin multiplier: {margin_multiplier}")
+
         # Update player ratings
         player1.rating += K * margin_multiplier * (score1 - expected_score1)
         player2.rating += K * margin_multiplier * (score2 - expected_score2)
+
+        logging.debug(f"New ratings: Player 1: {player1.rating}, Player 2: {player2.rating}")
 
         # Create and store the game record
         new_game = Game(
@@ -147,6 +162,8 @@ def add_game():
 
         db.session.add(new_game)
         db.session.commit()
+
+        logging.debug("Game successfully added")
 
         return jsonify({
             "id": new_game.id,
