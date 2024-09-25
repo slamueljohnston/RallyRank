@@ -42,15 +42,10 @@ class Game(db.Model):
     rating_change_player1 = db.Column(db.Integer, nullable=False, default = 0)
     rating_change_player2 = db.Column(db.Integer, nullable=False, default =0)
 
-@app.before_request
-def drop_and_create_tables():
-    db.drop_all()
-    db.create_all()
-
 # Create tables before handling the first request
-#@app.before_request
-#def create_tables():
-#    db.create_all()
+@app.before_request
+def create_tables():
+    db.create_all()
 
 # Get all players
 @app.route('/players', methods=['GET'])
