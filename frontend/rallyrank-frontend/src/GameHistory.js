@@ -25,7 +25,7 @@ const GameHistory = ({ limit }) => {
     };
 
     fetchGames();
-  }, []);
+  }, [limit]);
 
   if (loading) {
     return <p>Loading game history...</p>;
