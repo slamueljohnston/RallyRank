@@ -10,6 +10,7 @@ function MainRouter() {
       <Route path="/" element={<App />} />
       <Route path="/add-game" element={<AddGame />} />
       <Route path="/add-player" element={<AddPlayer />} />
+      <Route path="/full-game-history" element={<FullGameHistory />} />
     </Routes>
   );
 }
