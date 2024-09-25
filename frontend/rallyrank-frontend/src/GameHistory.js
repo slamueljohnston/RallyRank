@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getGameHistory } from './services/api';
 import { format } from 'date-fns';  // For formatting date and time
 
-const GameHistory = () => {
+const GameHistory = ({ limit }) => {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);  // Track loading state
   const [error, setError] = useState(null);      // Track errors
