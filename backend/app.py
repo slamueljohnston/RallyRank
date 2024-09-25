@@ -13,7 +13,7 @@ CORS(app)
 logging.basicConfig(level=logging.DEBUG)
 
 # Configure SQLite database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///rallyrank.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:tXQ6hNlGvCiOX1gK@inexpertly-winsome-goldeneye.data-1.use1.tembo.io:5432/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize the database
