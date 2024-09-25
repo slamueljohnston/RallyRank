@@ -121,11 +121,11 @@ def add_game():
 
         # Calculate the result based on scores
         if player1_score > player2_score:
-            result = 'player1_win'
+            result = 'player1win'
             score1 = 1  # player1 wins
             score2 = 0  # player2 loses
         elif player2_score > player1_score:
-            result = 'player2_win'
+            result = 'player2win'
             score1 = 0  # player1 loses
             score2 = 1  # player2 wins
         else:
@@ -236,8 +236,8 @@ def get_player_stats(player_id):
 
     # Count total wins (either as player1 or player2)
     wins = Game.query.filter(or_(
-        (Game.player1_id == player_id) & (Game.result == 'player1_win'),
-        (Game.player2_id == player_id) & (Game.result == 'player2_win')
+        (Game.player1_id == player_id) & (Game.result == 'player1win'),
+        (Game.player2_id == player_id) & (Game.result == 'player2win')
     )).count()
 
     # Calculate losses
