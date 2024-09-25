@@ -31,7 +31,6 @@ const RankingsList = () => {
 
   return (
     <div>
-      <h1>Player Rankings</h1>
       <ul>
         {rankings.map((player) => (
           <li key={player.id}>

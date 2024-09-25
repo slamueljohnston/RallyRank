@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getGameHistory } from './services/api';
+import { format } from 'date-fns';  // For formatting date and time
 
 const GameHistory = () => {
   const [games, setGames] = useState([]);
@@ -29,14 +30,28 @@ const GameHistory = () => {
     return <p>{error}</p>;
   }
 
+  const formatDateTime = (timestamp) => {
+    return format(new Date(timestamp), "h:mm a 'on' MMMM d, yyyy");
+  };
+
+  const formatGameResult = (game) => {
+    const { player1_name, player2_name, player1_score, player2_score, timestamp } = game;
+
+    if (player1_score > player2_score) {
+      return `${player1_name} (${player1_score}) defeated ${player2_name} (${player2_score}) at ${formatDateTime(timestamp)}`;
+    } else if (player2_score > player1_score) {
+      return `${player2_name} (${player2_score}) defeated ${player1_name} (${player1_score}) at ${formatDateTime(timestamp)}`;
+    } else {
+      return `${player1_name} (${player1_score}) tied with ${player2_name} (${player2_score}) at ${formatDateTime(timestamp)}`;
+    }
+  };
+
   return (
     <div>
-      <h1>Game History</h1>
       <ul>
         {games.map((game) => (
           <li key={game.id}>
-            {game.player1_name} vs {game.player2_name} - 
-            {game.player1_score} : {game.player2_score} - Result: {game.result}
+            {formatGameResult(game)}
           </li>
         ))}
       </ul>
