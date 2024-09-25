@@ -10,6 +10,11 @@ function App() {
     <div className="App">
       <h1>RallyRank</h1>
 
+      <div className="actions">
+        <button onClick={() => navigate('/add-game')}>Add Game Result</button>
+        <button onClick={() => navigate('/add-player')}>Add New Player</button>
+      </div>
+
       <h2>Current Rankings</h2>
       <RankingsList />
 

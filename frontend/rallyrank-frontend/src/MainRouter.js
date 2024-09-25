@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';  // No need to import BrowserRouter here
 import AddGame from './AddGame';
 import AddPlayer from './AddPlayer';
+import FullGameHistory from './FullGameHistory';
 import App from './App';
 
 function MainRouter() {
