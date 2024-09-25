@@ -256,14 +256,5 @@ def get_player_stats(player_id):
 def home():
     return "Hello, World!"
 
-@app.route('/alter_game_table', methods=['POST'])
-def alter_game_table():
-    try:
-        # Directly execute SQL to alter the table
-        db.engine.execute("ALTER TABLE game ALTER COLUMN result TYPE varchar(20);")
-        return jsonify({"message": "Game table altered successfully"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
 if __name__ == '__main__':
     app.run(debug=True)
