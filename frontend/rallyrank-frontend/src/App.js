@@ -19,7 +19,7 @@ function App() {
       <RankingsList compact={true} />
 
       <h2>Recent Game Results</h2>
-      <GameHistory compact={true} />
+      <GameHistory limit={10} compact={true} />
     </div>
   );
 }

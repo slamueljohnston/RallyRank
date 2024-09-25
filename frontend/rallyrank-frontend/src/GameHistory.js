@@ -11,7 +11,12 @@ const GameHistory = () => {
     const fetchGames = async () => {
       try {
         const gamesData = await getGameHistory();
-        setGames(gamesData);
+        // Sort games by timestamp descending
+        const sortedGames = gamesData.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+       
+        // Limit the games if a limit is provided
+        const limitedGames = limit ? sortedGames.slice(0,limit) : sortedGames;
+        setGames(limitedGames);
         setLoading(false);  // Loading is done
       } catch (err) {
         setError('Failed to fetch game history');
