@@ -31,13 +31,13 @@ const RankingsList = () => {
 
   return (
     <div>
-      <ul>
+      <ol>
         {rankings.map((player) => (
           <li key={player.id}>
             {player.name} - Rating: {player.rating}
           </li>
         ))}
-      </ul>
+      </ol>
     </div>
   );
 };
