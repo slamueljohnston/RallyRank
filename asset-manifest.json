@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "https://slamueljohnston.github.io/RallyRank/static/css/main.e6c13ad2.css",
-    "main.js": "https://slamueljohnston.github.io/RallyRank/static/js/main.8d94965c.js",
+    "main.js": "https://slamueljohnston.github.io/RallyRank/static/js/main.bcbfcd38.js",
     "index.html": "https://slamueljohnston.github.io/RallyRank/index.html",
     "main.e6c13ad2.css.map": "https://slamueljohnston.github.io/RallyRank/static/css/main.e6c13ad2.css.map",
-    "main.8d94965c.js.map": "https://slamueljohnston.github.io/RallyRank/static/js/main.8d94965c.js.map"
+    "main.bcbfcd38.js.map": "https://slamueljohnston.github.io/RallyRank/static/js/main.bcbfcd38.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.8d94965c.js"
+    "static/js/main.bcbfcd38.js"
   ]
 }
