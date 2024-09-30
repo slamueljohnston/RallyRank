@@ -12,5 +12,3 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('PROD_DB_URI')  # Production DB URI
-
-print(f"Using database URI: {os.getenv('LOCAL_DB_URI')}")
