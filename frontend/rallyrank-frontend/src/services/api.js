@@ -1,7 +1,13 @@
 import axios from 'axios';
 
-// Base URL for the Flask backend
-const API_BASE_URL = 'https://rallyrank.onrender.com';
+let API_BASE_URL;
+
+// Check if the app is running locally or in production
+if(window.location.hostname === 'localhost') {
+  API_BASE_URL = 'http://localhost:5000'; // Local Flask backend
+} else {
+  API_BASE_URL = 'https://rallyrank.onrender.com'; //Production backend on Render
+}
 
 // Fetch all players
 export const getPlayers = async () => {

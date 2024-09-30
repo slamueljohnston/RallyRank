@@ -14,8 +14,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "cross-env PUBLIC_URL='/' react-scripts start",
+    "build": "cross-env PUBLIC_URL='https://slamueljohnston.github.io/RallyRank/' react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
@@ -40,7 +40,7 @@
     ]
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "gh-pages": "^6.1.1"
-  },
-  "homepage": "https://slamueljohnston.github.io/RallyRank/"
+  }
 }

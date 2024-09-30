@@ -34,7 +34,7 @@ const RankingsList = () => {
       <ol>
         {rankings.map((player) => (
           <li key={player.id}>
-            {player.name} - Rating: {player.rating}
+            {player.name} ({player.rating})
           </li>
         ))}
       </ol>

@@ -1,0 +1,12 @@
+2024-09-29 16:44:54.849 PDT [19256] LOG:  starting PostgreSQL 12.17, compiled by Visual C++ build 1916, 64-bit
+2024-09-29 16:44:54.890 PDT [19256] LOG:  listening on IPv6 address "::1", port 5432
+2024-09-29 16:44:54.890 PDT [19256] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-09-29 16:44:55.333 PDT [2104] LOG:  database system was shut down at 2024-09-29 16:44:32 PDT
+2024-09-29 16:44:55.838 PDT [19256] LOG:  database system is ready to accept connections
+2024-09-29 16:52:58.791 PDT [21420] ERROR:  syntax error at or near "GRANT" at character 56
+2024-09-29 16:52:58.791 PDT [21420] STATEMENT:  CREATE USER rallyrank_user WITH PASSWORD 'tabletennis'
+	GRANT ALL PRIVILEGES ON DATABASE rallyrank_local TO rallyrank_user;
+2024-09-29 21:22:11.331 PDT [1620] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2024-09-29 21:22:11.331 PDT [21188] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	

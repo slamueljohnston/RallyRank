@@ -1,3 +1,4 @@
+import os
 from flask import Flask, jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
@@ -6,6 +7,10 @@ from flask_cors import CORS
 import logging
 from sqlalchemy.exc import SQLAlchemyError
 from flask_migrate import Migrate
+from config import DevelopmentConfig, ProductionConfig
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
@@ -13,8 +18,13 @@ CORS(app)
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
-# Configure SQLite database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:tXQ6hNlGvCiOX1gK@inexpertly-winsome-goldeneye.data-1.use1.tembo.io:5432/postgres'
+# Determine environment
+if os.getenv('FLASK_ENV') == 'development':
+    app.config.from_object(DevelopmentConfig)
+else:
+    app.config.from_object(ProductionConfig)
+
+# Configure PostgreSQL database
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize the database
