@@ -18,6 +18,7 @@ const DebugRouter = () => {
 function MainRouter() {
   return (
     <Router basename={basename}>
+      <DebugRouter />  {/* Log the basename and current location */}
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/add-game" element={<AddGame />} />
