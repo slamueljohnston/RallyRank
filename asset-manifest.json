@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/RallyRank/static/css/main.e6c13ad2.css",
-    "main.js": "/RallyRank/static/js/main.9529d80b.js",
+    "main.js": "/RallyRank/static/js/main.52511505.js",
     "index.html": "/RallyRank/index.html",
     "main.e6c13ad2.css.map": "/RallyRank/static/css/main.e6c13ad2.css.map",
-    "main.9529d80b.js.map": "/RallyRank/static/js/main.9529d80b.js.map"
+    "main.52511505.js.map": "/RallyRank/static/js/main.52511505.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.9529d80b.js"
+    "static/js/main.52511505.js"
   ]
 }
