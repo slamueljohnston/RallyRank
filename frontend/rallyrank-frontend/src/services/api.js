@@ -68,3 +68,23 @@ export const addGameResult = async (game) => {
     console.error('Error adding game result:', error);
   }
 };
+
+// Delete a game by ID
+export const deleteGame = async (gameId) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/games/${gameId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting game:', error);
+  }
+};
+
+// Edit a game by ID
+export const editGame = async (gameId, updatedData) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/games/${gameId}`, updatedData);
+    return response.data;
+  } catch (error) {
+    console.error('Error editing game:', error);
+  }
+};

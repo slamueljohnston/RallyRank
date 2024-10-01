@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "cross-env PUBLIC_URL='/' react-scripts start",
-    "build": "cross-env PUBLIC_URL='https://slamueljohnston.github.io/RallyRank/' react-scripts build",
+    "build": "cross-env PUBLIC_URL='/RallyRank/' react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
@@ -43,5 +43,6 @@
   "devDependencies": {
     "cross-env": "^7.0.3",
     "gh-pages": "^6.1.1"
-  }
+  },
+  "proxy": "http://localhost:5000"
 }

@@ -210,6 +210,78 @@ def get_games():
 
     return jsonify(game_data), 200
 
+# Delete a game
+@app.route('/games/<int:game_id>', methods=['DELETE'])
+def delete_game(game_id):
+    game = Game.query.get(game_id)
+    if not game:
+        return jsonify({"error": "Game not found"}), 404
+
+    # Fetch players
+    player1 = Player.query.get(game.player1_id)
+    player2 = Player.query.get(game.player2_id)
+
+    # Reverse the rating changes caused by this game
+    player1.rating -= game.rating_change_player1
+    player2.rating -= game.rating_change_player2
+
+    db.session.delete(game)
+    db.session.commit()
+    return jsonify({"message": "Game deleted successfully"}), 200
+
+# Edit a game
+@app.route('/games/<int:game_id>', methods=['PUT'])
+def edit_game(game_id):
+    game = Game.query.get(game_id)
+    if not game:
+        return jsonify({"error": "Game not found"}), 404
+
+    data = request.get_json()
+
+    # Fetch players
+    player1 = Player.query.get(game.player1_id)
+    player2 = Player.query.get(game.player2_id)
+
+    # Reverse the previous rating changes
+    player1.rating -= game.rating_change_player1
+    player2.rating -= game.rating_change_player2
+
+    # Update the scores
+    game.player1_score = data.get('player1_score', game.player1_score)
+    game.player2_score = data.get('player2_score', game.player2_score)
+
+    # Recalculate the result based on the new scores
+    if game.player1_score > game.player2_score:
+        game.result = 'player1win'
+        score1 = 1
+        score2 = 0
+    elif game.player2_score > game.player1_score:
+        game.result = 'player2win'
+        score1 = 0
+        score2 = 1
+    else:
+        game.result = 'draw'
+        score1 = score2 = 0.5
+
+    # Recalculate rating changes
+    K = 32
+    rating_diff = player2.rating - player1.rating
+    expected_score1 = 1 / (1 + 10 ** (rating_diff / 400))
+    expected_score2 = 1 - expected_score1
+
+    score_diff = abs(game.player1_score - game.player2_score)
+    margin_multiplier = (score_diff + 1) / 20
+
+    game.rating_change_player1 = int(K * margin_multiplier * (score1 - expected_score1))
+    game.rating_change_player2 = int(K * margin_multiplier * (score2 - expected_score2))
+
+    # Apply the new rating changes
+    player1.rating += game.rating_change_player1
+    player2.rating += game.rating_change_player2
+
+    db.session.commit()
+    return jsonify({"message": "Game updated successfully"}), 200
+
 # Get game history for a specific player
 @app.route('/games/player/<int:player_id>', methods=['GET'])
 def get_player_games(player_id):

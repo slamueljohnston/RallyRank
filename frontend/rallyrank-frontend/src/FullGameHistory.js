@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getGameHistory } from './services/api';
+import { getGameHistory, deleteGame, editGame } from './services/api';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
@@ -33,6 +33,29 @@ const FullGameHistory = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  const handleDelete = async (gameId) => {
+    if (window.confirm('Are you sure you want to delete this game?')) {
+      await deleteGame(gameId);
+      setGames(games.filter((game) => game.id !== gameId));
+    }
+  };
+
+  const handleEdit = async (gameId) => {
+    const player1Score = prompt('Enter new score for Player 1');
+    const player2Score = prompt('Enter new score for Player 2');
+
+    if (player1Score !== null && player2Score !== null) {
+      const updatedData = {
+        player1_score: parseInt(player1Score, 10),
+        player2_score: parseInt(player2Score, 10),
+      };
+      await editGame(gameId, updatedData);
+      setGames(games.map((game) =>
+        game.id === gameId ? { ...game, ...updatedData } : game
+      ));
+    }
+  };
+
   if (loading) {
     return <p>Loading game history...</p>;
   }
@@ -59,6 +82,7 @@ const FullGameHistory = () => {
             <th>Player 2 Score</th>
             <th>Player 1 Rating Change</th>
             <th>Player 2 Rating Change</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -79,6 +103,10 @@ const FullGameHistory = () => {
                 </td>
                 <td>
                   {game.player2_name}: {game.prior_rating_player2} → {player2NewRating} (+{game.rating_change_player2})
+                </td>
+                <td>
+                  <button onClick={() => handleEdit(game.id)}>Edit</button>
+                  <button onClick={() => handleDelete(game.id)}>Delete</button>
                 </td>
               </tr>
             );
