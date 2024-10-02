@@ -116,7 +116,7 @@ def add_game():
         player1_score = int(data['player1_score'])
         player2_score = int(data['player2_score'])
 
-        # Store prior ratings
+        # Ensure new game record is created
         prior_rating_player1 = player1.rating
         prior_rating_player2 = player2.rating
 
@@ -141,14 +141,13 @@ def add_game():
         score_diff = abs(player1_score - player2_score)
         margin_multiplier = (score_diff + 1) / 20
 
-        # Calculate rating changes
         rating_change_player1 = int(K * margin_multiplier * (score1 - expected_score1))
         rating_change_player2 = int(K * margin_multiplier * (score2 - expected_score2))
 
         player1.rating += rating_change_player1
         player2.rating += rating_change_player2
 
-        # Create and store the game record with prior ratings and rating changes
+        # Create a new game record with unique values for each game
         new_game = Game(
             player1_id=player1.id,
             player2_id=player2.id,
@@ -161,6 +160,7 @@ def add_game():
             rating_change_player2=rating_change_player2
         )
 
+        # Add the new game to the database and commit
         db.session.add(new_game)
         db.session.commit()
 
