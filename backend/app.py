@@ -14,7 +14,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+
+if os.getenv('FLASK_ENV') == 'development':
+    CORS(app)
+else:
+    CORS(app, origins=["https://slamueljohnston.github.io"])
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -58,6 +62,15 @@ class Game(db.Model):
 @app.before_request
 def create_tables():
     db.create_all()
+
+# Handle options
+@app.route('/games', methods=['OPTIONS'])
+def handle_options():
+    response = app.make_response('')
+    response.headers.add('Access-Control-Allow-Origin', 'https://slamueljohnston.github.io')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    return response
 
 # Get all players
 @app.route('/players', methods=['GET'])
