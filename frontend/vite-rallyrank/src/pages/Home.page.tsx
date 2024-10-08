@@ -1,134 +1,168 @@
 import { ColorSchemeToggle } from '../components/ColorSchemeToggle/ColorSchemeToggle';
 import React, { useState, useEffect } from 'react';
-import { AppShell, Text, Burger, Title, Button, Modal, TextInput, Group, Stack, Select } from '@mantine/core';
+import { useNavigate } from 'react-router-dom';
+import { AppShell, Text, Burger, Title, Button, Modal, TextInput, Group, Stack, Select, createTheme, MantineProvider, Image, NavLink } from '@mantine/core';
+import { IconPingPong, IconListNumbers, IconHome } from '@tabler/icons-react';
+import { useForm } from '@mantine/form';
+
+// Components
 import RankingsList from '../components/RankingsList';
 import GameHistory from '../components/GameHistory';
-import { addPlayer, getPlayers, removePlayer } from '../services/api';
+import AddPlayerModal from '../components/modals/AddPlayerModal';
+import AddGameResultModal from '../components/modals/AddGameResultModal';
+
+// Pages
+import FullGameHistoryPage from './FullGameHistoryPage';
+import FullPlayersPage from './FullPlayersPage';
+
+import { usePlayerManagement } from '../playerManagement/usePlayerManagement';
 import { useDisclosure } from '@mantine/hooks';
+import { showNotification } from '@mantine/notifications';
+import logo from "./RallyRankLogo.png";
 
 interface Player {
   id: number;
   name: string;
+  rating: number;
+  is_active: boolean;
 }
 
+interface GameFormValues {
+  player1: string;
+  player2: string;
+  player1score: number;
+  player2score: number;
+}
+
+interface AddPlayerFormValues {
+  playerName: string;
+}
+
+interface RemovePlayerFormValues {
+  selectedPlayer: string;
+}
+
+const theme = createTheme({
+  colors: {
+    'ag-turqoise': ["#ebfeff", "#d7fbfd", "#aaf8fc", "#7df6fc", "#62f4fb", "#56f2fb", "#4ef2fb", "#41d7e0", "#2fbfc7", "#00a6ad"],
+  },
+  fontFamily: '"IBM Plex Mono", system-ui',
+  headings: {fontFamily: '"IBM Plex Mono", system-ui'},
+  defaultRadius: 'md',
+  primaryColor: 'ag-turqoise'
+})
+
 export function HomePage() {
+  const [viewHome, setViewHome] = useState(true);
+  const [viewGameHistory, setViewGameHistory] = useState(false);
+  const [viewFullRankings, setViewFullRankings] = useState(false);
   const [opened, { toggle }] = useDisclosure();
-  const [loading, setLoading] = useState(false);
-  const [modalOpened, setModalOpened] = useState(false);
-  const [removeModalOpened, setRemoveModalOpened] = useState(false);
-  const [playerName, setPlayerName] = useState('');
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
-  const [refresh, setRefresh] = useState(false);
+  const [addModalOpened, setAddModalOpened] = useState(false);
+  const [gameModalOpened, setGameModalOpened] = useState(false);
+  const [inactivePlayerId, setInactivePlayerId] = useState<number | null>(null);
 
   useEffect(() => {
-    const fetchPlayers = async () => {
-      const playersData = await getPlayers();
-      setPlayers(playersData);
-    };
+    console.log('Inactive Player ID:', inactivePlayerId);  // Debugging log to verify state update
+  }, [inactivePlayerId]);
 
-    fetchPlayers();
-  }, [refresh]);
+  // Hook for player management
+  const {
+    players,
+    inactivePlayers,
+    loading,
+    handleAddPlayer,
+    handleRemovePlayer,
+    handleReactivatePlayer,
+    handleAddGameResult,
+    refresh,
+    setRefresh
+  } = usePlayerManagement();
 
-  const handleAddPlayer = async () => {
-    if (playerName.trim() == ''){
-      alert('Player name cannot be blank');
-      return;
-    }
-
-    const existingPlayer = players.find((player) => player.name.toLowerCase() === playerName.toLowerCase());
-    if(existingPlayer) {
-      alert('A player with this name already exists');
-      return;
-    }
-
-    setLoading(true);
-    await addPlayer({name: playerName});
-    setModalOpened(false);
-    setLoading(false);
-    setRefresh((prev) => !prev);
-  };
-
-  const handleRemovePlayer = async () => {
-    if (!selectedPlayer) {
-      alert('Please select a player to remove');
-      return;
-    }
-    
-    setLoading(true);
-    await removePlayer(Number(selectedPlayer));
-    setRemoveModalOpened(false);
-    setLoading(false);
-    setRefresh((prev) => !prev)
-  };
-
+  // Forms for game results and player management
+  const gameForm = useForm<GameFormValues>({ initialValues: { player1: '', player2: '', player1score: 0, player2score: 0 } });
+  const playerForm = useForm<AddPlayerFormValues>({
+    initialValues: {
+      playerName: '',
+    },
+    validate: {
+      playerName: (value) => {
+        const playerExists = players.concat(inactivePlayers).find((player) => player.name.toLowerCase() === value.toLowerCase());
+        return value.trim() === '' ? 'Player name cannot be blank' : playerExists ? 'Player already exists' : null;
+      },
+    },
+  });
+  const removeForm = useForm<RemovePlayerFormValues>({ initialValues: { selectedPlayer: '' } });
+  
   return (
-    <AppShell
-      header={{ height: 60}}
-      navbar={{
-        width: 300,
-        breakpoint: 'sm',
-        collapsed: { mobile: !opened },
-      }}
-      padding="md"
-    >
-      <AppShell.Header>
-      <Burger
-          opened={opened}
-          onClick={toggle}
-          hiddenFrom="sm"
-          size="sm"
-        />
-        <Title order={1}> RallyRank </Title>
-      </AppShell.Header>
+    <MantineProvider theme={theme}>
+      <AppShell
+        header={{ height: 80 }}
+        navbar={{
+          width: 300,
+          breakpoint: 'sm',
+          collapsed: { mobile: !opened },
+        }}
+        padding="md"
+      >
+        <AppShell.Header>
+        <Group h="100%" px="md">
+          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+          <Image src={logo} h={80}/>
+        </Group>
+        </AppShell.Header>
 
-      <AppShell.Navbar p="md">Buttons Here</AppShell.Navbar>
+        <AppShell.Navbar p="md">
+        <NavLink
+          label="Home"
+          leftSection={<IconHome size="1rem" stroke={1.5} />}
+          onClick={() => { setViewHome(true); setViewGameHistory(false); setViewFullRankings(false)}}
+          />
+          <NavLink
+            label="Players"
+            leftSection={<IconListNumbers size="1rem" stroke={1.5} />}
+            onClick={() => { setViewHome(false); setViewGameHistory(false); setViewFullRankings(true)}}
+          />
+          <NavLink
+            label="Game Results"
+            leftSection={<IconPingPong size="1rem" stroke={1.5} />}
+            onClick={() => { setViewHome(false); setViewGameHistory(true); setViewFullRankings(false)}}
+          />
+        </AppShell.Navbar>
 
-      <AppShell.Main>
-        <Stack
-          align="flex-start"
-        >
-          <Group>
-            <Button onClick={() => setModalOpened(true)}>Add New Player</Button>
-            <Button onClick={() => setRemoveModalOpened(true)}>Remove a Player</Button>
-            <Button>Add Game Result</Button>
-            <Button>Edit Game Result</Button>
-          </Group>
+        <AppShell.Main>
+          <Stack align="flex-start">
+            <Group>
+              <Button onClick={() => setAddModalOpened(true)}>Add New Player</Button>
+              <Button onClick={() => setGameModalOpened(true)}>Add Game Result</Button>
+            </Group>
 
-          {/* Modal for adding a player */}
-          <Modal
-            opened={modalOpened}
-            onClose={() => setModalOpened(false)}
-            title="Add New Player"
-          >
-            <TextInput
-              label="Player Name"
-              value={playerName}
-              onChange={(event) => setPlayerName(event.currentTarget.value)}
+            {/* Modals for player management and game results */}
+            <AddPlayerModal
+              opened={addModalOpened}
+              onClose={() => setAddModalOpened(false)}
+              handleAddPlayer={(playerName) => handleAddPlayer(playerName, setAddModalOpened)}
+              loading={loading}
+              form={playerForm}
             />
-            <Button fullWidth mt="md" onClick={handleAddPlayer} loading={loading}>
-            Add Player
-            </Button>
-          </Modal>
-          
-          {/* Modal for removing a player */}
-          <Modal opened={removeModalOpened} onClose={() => setRemoveModalOpened(false)} title="Remove a Player">
-            <Select
-              label="Select a player to remove"
-              data={players.map((player) => ({ value: player.id.toString(), label: player.name }))}
-              value={selectedPlayer}
-              onChange={setSelectedPlayer}
+            <AddGameResultModal
+              opened={gameModalOpened}
+              onClose={() => setGameModalOpened(false)}
+              handleAddGameResult={() => handleAddGameResult(gameForm, setGameModalOpened)}
+              loading={loading} form={gameForm}
+              players={players.map(player => ({ value: player.id.toString(), label: player.name }))}
             />
-            <Button fullWidth mt="md" onClick={handleRemovePlayer} loading={loading}>
-              Remove Player
-            </Button>
-          </Modal>
-          
-          <RankingsList refresh={refresh} />
-          <GameHistory />
-        </Stack>
-      </AppShell.Main>
-      
-    </AppShell>
+            {viewHome && (
+            <Stack align="flex-start">
+              <RankingsList refresh={refresh} />
+              <GameHistory refresh={refresh} />
+            </Stack>
+          )}
+          {viewGameHistory && <FullGameHistoryPage />}  {/* Show full game history if selected */}
+
+          {viewFullRankings && <FullPlayersPage />}  {/* Show full players if selected */}
+          </Stack>
+        </AppShell.Main>
+      </AppShell>
+    </MantineProvider>
   );
 }

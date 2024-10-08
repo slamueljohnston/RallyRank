@@ -1,4 +1,5 @@
 import os
+import sys
 from flask import Flask, jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
@@ -38,6 +39,7 @@ class Player(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     rating = db.Column(db.Integer, default=1000)
+    is_active = db.Column(db.Boolean, default=True)
 
 class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -61,7 +63,7 @@ def create_tables():
 @app.route('/players', methods=['GET'])
 def get_players():
     players = Player.query.all()
-    return jsonify([{"id": player.id, "name": player.name, "rating": player.rating} for player in players]), 200
+    return jsonify([{"id": player.id, "name": player.name, "rating": player.rating, "is_active": player.is_active} for player in players]), 200
 
 # Get a specific player by ID
 @app.route('/players/<int:player_id>', methods=['GET'])
@@ -77,25 +79,59 @@ def add_player():
     data = request.get_json()
     if not data or 'name' not in data:
         return jsonify({"error": "Invalid input"}), 400
-    new_player = Player(name=data['name'])
+    
+    existing_inactive_player = Player.query.filter_by(name=data['name'], is_active=False).first()
+
+    if existing_inactive_player:
+        return jsonify({
+            "message": "An inactive player with this name already exists. Would you like to reactivate the player?",
+            "player_id": existing_inactive_player.id
+        }), 409
+
+    new_player = Player(name=data['name'], is_active=True)
     db.session.add(new_player)
     db.session.commit()
     return jsonify({"id": new_player.id, "name": new_player.name, "rating": new_player.rating}), 201
+
+# Reactivate an inactive player
+@app.route('/players/reactivate/<int:player_id>', methods=['POST'])
+def reactivate_player(player_id):
+    player = Player.query.get(player_id)
+    if not player or player.is_active:
+        return jsonify({"error": "Player not found or already active"}), 404
+    
+    player.is_active = True
+    db.session.commit()
+    return jsonify({"message": "Player reactivated successfully", "id": player.id}), 200
 
 # Remove a player
 @app.route('/players/<int:player_id>', methods=['DELETE'])
 def remove_player(player_id):
     player = Player.query.get(player_id)
-    if player is None:
+    if not player:
         return jsonify({"error": "Player not found"}), 404
-    db.session.delete(player)
+    player.is_active = False
     db.session.commit()
     return jsonify({"message": "Player removed successfully"}), 200
+
+# Delete a player permanently
+@app.route('/players/<int:player_id>/delete', methods=['DELETE'])
+def delete_player(player_id):
+    player = Player.query.get(player_id)
+    if not player:
+        return jsonify({"error": "Player not found"}), 404
+    
+    # Remove all related games
+    Game.query.filter(or_(Game.player1_id == player_id, Game.player2_id == player_id)).delete()
+    
+    db.session.delete(player)
+    db.session.commit()
+    return jsonify({"message": "Player and all related games deleted successfully"}), 200
 
 # Get rankings
 @app.route('/rankings', methods=['GET'])
 def get_rankings():
-    players = Player.query.order_by(Player.rating.desc()).all()  # Sort by rating in descending order
+    players = Player.query.filter_by(is_active=True).order_by(Player.rating.desc()).all()  # Sort by rating in descending order
     return jsonify([{"id": player.id, "name": player.name, "rating": player.rating} for player in players]), 200
 
 # Submit game results

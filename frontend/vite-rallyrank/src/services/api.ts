@@ -33,6 +33,7 @@ export const getPlayers = async () => {
 export const getGameHistory = async () => {
     try {
         const response = await api.get('/games');
+        console.log('Retrieving Games: ', response.data);
         return response.data;
     } catch (error) {
         console.error('Error fetching games:', error);
@@ -40,7 +41,7 @@ export const getGameHistory = async () => {
 };
 
 // Add a new player
-export const addPlayer = async (player: { name: string}) => {
+export const addPlayer = async (player: { name: string }) => {
     try {
         const response = await api.post('/players', player);
         return response.data;
@@ -58,3 +59,53 @@ export const removePlayer = async (playerId: number) => {
       console.error('Error removing player:', error);
     }
   }
+
+  // Reactivate a previously removed player
+  export const reactivatePlayer = async (playerId: number) => {
+    try {
+      const response = await api.post(`/players/reactivate/${playerId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error reactivating player:', error)
+    }
+  }
+
+  // Permanently delete a player and all related games
+  export const deletePlayer = async (playerId: number) => {
+    try {
+      const response = await api.delete(`/players/${playerId}/delete`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting player:', error);
+    }
+  };
+
+  // Adds a game result
+  export const addGameResult = async (gameData: { player1_id: string; player2_id: string; player1_score: number; player2_score: number }) => {
+    try {
+      const response = await api.post('/games', gameData);
+      return response.data;
+    } catch (error) {
+      console.error('Error adding game:', error);
+    }
+  }
+
+  // Delete a game by ID
+  export const deleteGame = async (gameId: number) => {
+    try {
+      const response = await api.delete(`/games/${gameId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting game:', error);
+    }
+  };
+
+  // Edit a game by ID
+  export const editGame = async (gameId: number, updatedData: {player1_score: number; player2_score: number}) => {
+    try {
+      const response = await api.put(`/games/${gameId}`, updatedData);
+      return response.data;
+    } catch (error) {
+      console.error('Error editing game:', error);
+    }
+  };

@@ -51,7 +51,7 @@ const RankingsList: React.FC<RankingsListProps> = ({ refresh }) => {
             <Table.Th>Rating</Table.Th>
           </Table.Tr>
         </Table.Thead>
-        <tbody>
+        <Table.Tbody>
           {rankings.map((player, index) => (
             <Table.Tr key={player.id}>
               <Table.Td>{index + 1}</Table.Td>
@@ -59,7 +59,7 @@ const RankingsList: React.FC<RankingsListProps> = ({ refresh }) => {
               <Table.Td>{player.rating}</Table.Td>
             </Table.Tr>
           ))}
-        </tbody>
+        </Table.Tbody>
       </Table>
     </div>
   );
