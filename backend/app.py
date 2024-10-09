@@ -63,6 +63,11 @@ class Game(db.Model):
 def create_tables():
     db.create_all()
 
+# Ping endpoint
+@app.route('/ping', methods=['GET'])
+def get_ping():
+    return jsonify({"status": "ok"}), 200
+
 # Handle options
 @app.route('/games', methods=['OPTIONS'])
 def handle_options():
