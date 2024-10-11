@@ -31,7 +31,6 @@ const FullGameHistoryPage: React.FC = () => {
       const gamesData = await getGameHistory();
       setGames(gamesData);
       setLoading(false);
-      console.log("Fetched Games:", gamesData)
     };
 
     fetchGames();
@@ -82,58 +81,57 @@ const FullGameHistoryPage: React.FC = () => {
   return (
     <>
     <Stack>
-    <Group>
-      <Button onClick={() => setEditModalOpened(true)} disabled={!selectedGame}>
-        Edit Game Result
-      </Button>
-    </Group>
-    <Table highlightOnHover>
-      <Table.Thead>
-        <Table.Tr>
-          <Table.Th></Table.Th>  {/* For row selection checkboxes */}
-          <Table.Th>Date</Table.Th>
-          <Table.Th>Time</Table.Th>
-          <Table.Th>Player 1 Name</Table.Th>
-          <Table.Th>Player 1 Score</Table.Th>
-          <Table.Th>Player 2 Name</Table.Th>
-          <Table.Th>Player 2 Score</Table.Th>
-          <Table.Th>Player 1 Rating Change</Table.Th>
-          <Table.Th>Player 2 Rating Change</Table.Th>
-        </Table.Tr>
-      </Table.Thead>
-      <Table.Tbody>
-        {games.map((game) => (
-          <Table.Tr key={game.id} onClick={() => handleGameSelect(game)}>
-          <Table.Td>
-            <Checkbox
-              checked={selectedGame?.id === game.id}
-              aria-label="Select row"
-            />
-          </Table.Td>
-          <Table.Td>{formatDateTime(game.timestamp).date}</Table.Td>
-          <Table.Td>{formatDateTime(game.timestamp).time}</Table.Td>
-          <Table.Td>{game.player1_name}</Table.Td>
-          <Table.Td>{game.player1_score}</Table.Td>
-          <Table.Td>{game.player2_name}</Table.Td>
-          <Table.Td>{game.player2_score}</Table.Td>
-          <Table.Td>
-            {game.player1_name}: {game.prior_rating_player1} → {game.prior_rating_player1 + game.rating_change_player1} (
-            {game.rating_change_player1 >= 0
-              ? `+${game.rating_change_player1}`
-              : game.rating_change_player1}
-            )
-          </Table.Td>
-          <Table.Td>
-            {game.player2_name}: {game.prior_rating_player2} → {game.prior_rating_player2 + game.rating_change_player2} (
-            {game.rating_change_player2 >= 0
-              ? `+${game.rating_change_player2}`
-              : game.rating_change_player2}
-            )
-          </Table.Td>
-        </Table.Tr>
-        ))}
-      </Table.Tbody>
-    </Table>
+      <Group>
+        <Button onClick={() => setEditModalOpened(true)} disabled={!selectedGame}>
+          Edit Game Result
+        </Button>
+      </Group>
+      <Table highlightOnHover>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th />
+            <Table.Th>Date</Table.Th>
+            <Table.Th>Time</Table.Th>
+            <Table.Th>Player 1 Name</Table.Th>
+            <Table.Th>Player 1 Score</Table.Th>
+            <Table.Th>Player 2 Name</Table.Th>
+            <Table.Th>Player 2 Score</Table.Th>
+            <Table.Th>Player 1 Rating Change</Table.Th>
+            <Table.Th>Player 2 Rating Change</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {games.map((game) => (
+            <Table.Tr key={game.id} onClick={() => handleGameSelect(game)}>
+              <>
+                <Table.Td>
+                  <Checkbox
+                    checked={selectedGame?.id === game.id}
+                    onChange={() => handleGameSelect(game)}
+                    aria-label="Select row"
+                  />
+                </Table.Td>
+                <Table.Td>{formatDateTime(game.timestamp).date}</Table.Td>
+                <Table.Td>{formatDateTime(game.timestamp).time}</Table.Td>
+                <Table.Td>{game.player1_name}</Table.Td>
+                <Table.Td>{game.player1_score}</Table.Td>
+                <Table.Td>{game.player2_name}</Table.Td>
+                <Table.Td>{game.player2_score}</Table.Td>
+                <Table.Td>
+                  {game.player1_name}: {game.prior_rating_player1} →{' '}
+                  {game.prior_rating_player1 + game.rating_change_player1} (
+                  {game.rating_change_player1 >= 0 ? `+${game.rating_change_player1}` : game.rating_change_player1})
+                </Table.Td>
+                <Table.Td>
+                  {game.player2_name}: {game.prior_rating_player2} →{' '}
+                  {game.prior_rating_player2 + game.rating_change_player2} (
+                  {game.rating_change_player2 >= 0 ? `+${game.rating_change_player2}` : game.rating_change_player2})
+                </Table.Td>
+              </>
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+      </Table>
     </Stack>
 
     <Modal opened={editModalOpened} onClose={() => setEditModalOpened(false)} title="Edit Game Result">

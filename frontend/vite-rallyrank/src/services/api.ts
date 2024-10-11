@@ -33,7 +33,6 @@ export const getPlayers = async () => {
 export const getGameHistory = async () => {
     try {
         const response = await api.get('/games');
-        console.log('Retrieving Games: ', response.data);
         return response.data;
     } catch (error) {
         console.error('Error fetching games:', error);

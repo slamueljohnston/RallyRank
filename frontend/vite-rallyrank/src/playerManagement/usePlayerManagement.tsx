@@ -28,7 +28,11 @@ export const usePlayerManagement = () => {
   }, [refresh]);
 
   // Handle adding a player
-  const handleAddPlayer = async (playerName: string, setAddModalOpened: (value: boolean) => void) => {
+  const handleAddPlayer = async (
+    playerName: string,
+     setAddModalOpened: (value: boolean) => void,
+     resetForm: () => void
+     ) => {
     setLoading(true);
     try {
       const response = await addPlayer({ name: playerName });
@@ -38,6 +42,7 @@ export const usePlayerManagement = () => {
       } else {
         showNotification({ message: 'Player added successfully!', color: 'green' });
         setAddModalOpened(false);
+        resetForm();
       }
     } catch (error) {
       console.error('Error adding player:', error);
@@ -98,7 +103,11 @@ export const usePlayerManagement = () => {
   };
 
   // Handle adding a game result
-  const handleAddGameResult = async (gameForm: any, setGameModalOpened: (value: boolean) => void) => {
+  const handleAddGameResult = async (
+    gameForm: any,
+    setGameModalOpened: (value: boolean) => void,
+    resetForm: () => void
+    ) => {
     const { player1, player2, player1score, player2score } = gameForm.values;
     if (player1 === player2) {
       showNotification({ message: 'A player cannot play against themselves!', color: 'red' });
@@ -115,6 +124,7 @@ export const usePlayerManagement = () => {
       });
       showNotification({ message: 'Game added successfully!', color: 'green' });
       setGameModalOpened(false);
+      resetForm();
     } catch (error) {
       console.error('Error adding game result:', error);
       showNotification({ message: 'Error adding game result', color: 'red' });

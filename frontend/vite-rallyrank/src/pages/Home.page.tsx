@@ -1,6 +1,5 @@
-import { ColorSchemeToggle } from '../components/ColorSchemeToggle/ColorSchemeToggle';
+import { ColorSchemeToggle } from '../components/toggles/ColorSchemeToggle';
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { AppShell, Text, Burger, Title, Button, Modal, TextInput, Group, Stack, Select, createTheme, MantineProvider, Image, NavLink } from '@mantine/core';
 import { IconPingPong, IconListNumbers, IconHome } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
@@ -17,8 +16,8 @@ import FullPlayersPage from './FullPlayersPage';
 
 import { usePlayerManagement } from '../playerManagement/usePlayerManagement';
 import { useDisclosure } from '@mantine/hooks';
-import { showNotification } from '@mantine/notifications';
 import logo from "./RallyRankLogo.png";
+import { GitHubLink } from '@/components/toggles/GitHubLink';
 
 interface Player {
   id: number;
@@ -56,14 +55,9 @@ export function HomePage() {
   const [viewHome, setViewHome] = useState(true);
   const [viewGameHistory, setViewGameHistory] = useState(false);
   const [viewFullRankings, setViewFullRankings] = useState(false);
-  const [opened, { toggle }] = useDisclosure();
+  const [opened, { toggle, close }] = useDisclosure();
   const [addModalOpened, setAddModalOpened] = useState(false);
   const [gameModalOpened, setGameModalOpened] = useState(false);
-  const [inactivePlayerId, setInactivePlayerId] = useState<number | null>(null);
-
-  useEffect(() => {
-    console.log('Inactive Player ID:', inactivePlayerId);  // Debugging log to verify state update
-  }, [inactivePlayerId]);
 
   // Hook for player management
   const {
@@ -105,27 +99,48 @@ export function HomePage() {
         padding="md"
       >
         <AppShell.Header>
-        <Group h="100%" px="md">
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <Image src={logo} h={80}/>
-        </Group>
+          <Group h="100%" px="md" justify="space-between">
+            <Group h="100%" px="md">
+              <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+              <Image src={logo} h={80}/>
+            </Group>
+            <Group justify="flex-end">
+              <GitHubLink />
+              <ColorSchemeToggle />
+            </Group>
+          </Group>
         </AppShell.Header>
 
         <AppShell.Navbar p="md">
         <NavLink
           label="Home"
           leftSection={<IconHome size="1rem" stroke={1.5} />}
-          onClick={() => { setViewHome(true); setViewGameHistory(false); setViewFullRankings(false)}}
+          onClick={() => {
+            setViewHome(true);
+            setViewGameHistory(false);
+            setViewFullRankings(false);
+            close();
+          }}
           />
           <NavLink
             label="Players"
             leftSection={<IconListNumbers size="1rem" stroke={1.5} />}
-            onClick={() => { setViewHome(false); setViewGameHistory(false); setViewFullRankings(true)}}
+            onClick={() => {
+              setViewHome(false);
+              setViewGameHistory(false);
+              setViewFullRankings(true);
+              close();
+            }}
           />
           <NavLink
             label="Game Results"
             leftSection={<IconPingPong size="1rem" stroke={1.5} />}
-            onClick={() => { setViewHome(false); setViewGameHistory(true); setViewFullRankings(false)}}
+            onClick={() => {
+              setViewHome(false);
+              setViewGameHistory(true);
+              setViewFullRankings(false);
+              close();
+            }}
           />
         </AppShell.Navbar>
 
@@ -140,15 +155,16 @@ export function HomePage() {
             <AddPlayerModal
               opened={addModalOpened}
               onClose={() => setAddModalOpened(false)}
-              handleAddPlayer={(playerName) => handleAddPlayer(playerName, setAddModalOpened)}
+              handleAddPlayer={(playerName) => handleAddPlayer(playerName, setAddModalOpened, playerForm.reset)}
               loading={loading}
               form={playerForm}
             />
             <AddGameResultModal
               opened={gameModalOpened}
               onClose={() => setGameModalOpened(false)}
-              handleAddGameResult={() => handleAddGameResult(gameForm, setGameModalOpened)}
-              loading={loading} form={gameForm}
+              handleAddGameResult={() => handleAddGameResult(gameForm, setGameModalOpened, gameForm.reset)}
+              loading={loading}
+              form={gameForm}
               players={players.map(player => ({ value: player.id.toString(), label: player.name }))}
             />
             {viewHome && (

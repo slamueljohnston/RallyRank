@@ -16,7 +16,7 @@ load_dotenv()
 app = Flask(__name__)
 
 if os.getenv('FLASK_ENV') == 'development':
-    CORS(app)
+    CORS(app, origins=["http://localhost:5173"])
 else:
     CORS(app, origins=["https://slamueljohnston.github.io"])
 
@@ -72,7 +72,6 @@ def get_ping():
 @app.route('/games', methods=['OPTIONS'])
 def handle_options():
     response = app.make_response('')
-    response.headers.add('Access-Control-Allow-Origin', 'https://slamueljohnston.github.io')
     response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     return response
