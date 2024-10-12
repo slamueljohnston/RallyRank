@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getRankings } from '../services/api';
 import { Table, Loader, Title, Text } from '@mantine/core';
+import { getPlayerTitle } from '@/utils/titles';
 
 interface Player {
   id: number;
@@ -10,12 +11,14 @@ interface Player {
 
 interface RankingsListProps {
     refresh: boolean;
+    players: Player[];
 }
 
-const RankingsList: React.FC<RankingsListProps> = ({ refresh }) => {
+const RankingsList: React.FC<RankingsListProps> = ({ refresh, players }) => {
   const [rankings, setRankings] = useState<Player[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const totalPlayers = players.length;
 
   useEffect(() => {
     const fetchRankings = async () => {
@@ -47,6 +50,7 @@ const RankingsList: React.FC<RankingsListProps> = ({ refresh }) => {
         <Table.Thead>
           <Table.Tr>
             <Table.Th>Rank</Table.Th>
+            <Table.Th>Title</Table.Th>
             <Table.Th>Player Name</Table.Th>
             <Table.Th>Rating</Table.Th>
           </Table.Tr>
@@ -55,6 +59,7 @@ const RankingsList: React.FC<RankingsListProps> = ({ refresh }) => {
           {rankings.map((player, index) => (
             <Table.Tr key={player.id}>
               <Table.Td>{index + 1}</Table.Td>
+              <Table.Td>{getPlayerTitle(index + 1, totalPlayers)}</Table.Td>
               <Table.Td>{player.name}</Table.Td>
               <Table.Td>{player.rating}</Table.Td>
             </Table.Tr>

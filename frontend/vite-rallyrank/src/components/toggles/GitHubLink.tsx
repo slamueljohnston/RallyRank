@@ -19,7 +19,7 @@ export function GitHubLink() {
           color={isDark ? 'white' : 'black'}
           size="lg"
         > 
-        <IconBrandGithub/>
+        <IconBrandGithub size="1.2rem" stroke={1.5}/>
         </ActionIcon>
         </a>
       </HoverCard.Target>

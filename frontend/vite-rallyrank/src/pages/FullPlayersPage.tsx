@@ -3,6 +3,7 @@ import { Table, Checkbox, Loader, Title, Text, Button, Group, Stack, Modal, Coll
 import { format } from 'date-fns';
 import { getRankings, getPlayers } from '@/services/api';
 import { usePlayerManagement } from '@/playerManagement/usePlayerManagement';
+import { getPlayerTitle } from '@/utils/titles';
 
 interface Player {
     id: number;
@@ -10,6 +11,10 @@ interface Player {
     rating: number;
   }
   
+interface FullPlayersPageProps {
+  players: Player[];
+}
+
   const FullPlayersPage: React.FC = () => {
     const [removeModalOpened, setRemoveModalOpened] = useState(false);
     const [reactivateModalOpened, setReactivateModalOpened] = useState(false);
@@ -21,6 +26,8 @@ interface Player {
   
     // Sort active players by rating
     const sortedPlayers = [...players].sort((a,b) => b.rating - a.rating);
+
+    const totalPlayers= players.length;
 
     // Deactivate Confirmation Modal
     const RemovePlayerModal: React.FC<{ player: Player | null; opened: boolean; onClose: () => void; handleRemovePlayer: () => void }> = ({
@@ -94,32 +101,41 @@ interface Player {
           </Button>
         </Group>
   
-        <Table highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th />
-              <Table.Th>Player Name</Table.Th>
-              <Table.Th>Rating</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {sortedPlayers.map((player) => (
-              <Table.Tr
-                key={player.id}
-                onClick={() => handleSelectActivePlayer(player)}
-                bg={selectedActivePlayer?.id === player.id ? 'var(--mantine-color-blue-light)' : undefined}
-              >
-                <Table.Td>
-                  <Checkbox
-                    checked={selectedActivePlayer?.id === player.id}
-                    aria-label="Select row"
-                    onChange={() => {}}
-                  />
-                </Table.Td><Table.Td>{player.name}</Table.Td><Table.Td>{player.rating}</Table.Td>
+        <Group>
+          <Table highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th />
+                <Table.Th>Rank</Table.Th>
+                <Table.Th>Title</Table.Th>
+                <Table.Th>Player Name</Table.Th>
+                <Table.Th>Rating</Table.Th>
               </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
+            </Table.Thead>
+            <Table.Tbody>
+              {sortedPlayers.map((player, index) => (
+                <Table.Tr
+                  key={player.id}
+                  onClick={() => handleSelectActivePlayer(player)}
+                  bg={selectedActivePlayer?.id === player.id ? 'var(--mantine-color-blue-light)' : undefined}
+                >
+                  <Table.Td>
+                    <Checkbox
+                      checked={selectedActivePlayer?.id === player.id}
+                      aria-label="Select row"
+                      onChange={() => {}}
+                    />
+                  </Table.Td>
+                  <Table.Td>{index + 1}</Table.Td>
+                  <Table.Td>{getPlayerTitle(index + 1, totalPlayers)}</Table.Td>
+                  <Table.Td>{player.name}</Table.Td>
+                  <Table.Td>{player.rating}</Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        </Group>
+        
 
         <Button onClick={() => setInactiveVisible((prev) => !prev)}>
           {inactiveVisible ? 'Hide Inactive Players' : 'Show Inactive Players'}

@@ -14,7 +14,7 @@ export function ColorSchemeToggle() {
           onClick={() => toggleColorScheme()}
           size="lg"
         >
-          {isDark ? <IconSun size="1.2rem" /> : <IconMoonStars size="1.2rem" />}  {/* Sun/Moon icons based on mode */}
+          {isDark ? <IconSun size="1.2rem" stroke={1.5}/> : <IconMoonStars size="1.2rem" stroke={1.5}/>}  {/* Sun/Moon icons based on mode */}
         </ActionIcon>
       </HoverCard.Target>
       <HoverCard.Dropdown>

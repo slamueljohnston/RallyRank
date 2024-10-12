@@ -45,6 +45,8 @@ const GameHistory: React.FC<GameHistoryProps> = ({ refresh }) => {
     return <Text color="red">{error}</Text>;
   }
 
+  const recentGames = games.slice(0, 10);
+
   return (
     <div>
       <Title order={2}>Recent Game Results</Title>
@@ -60,7 +62,7 @@ const GameHistory: React.FC<GameHistoryProps> = ({ refresh }) => {
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {games.map((game) => (
+          {recentGames.map((game) => (
             <Table.Tr key={game.id}>
               <Table.Td>{format(new Date(game.timestamp), "MMM d, yyyy")}</Table.Td>
               <Table.Td>{format(new Date(game.timestamp), "p")}</Table.Td>

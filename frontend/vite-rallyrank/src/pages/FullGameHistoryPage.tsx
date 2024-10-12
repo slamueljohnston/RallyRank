@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Checkbox, Button, Group, Loader, Skeleton, Stack, Modal, TextInput } from '@mantine/core';
+import { Table, Checkbox, Button, Group, Loader, Skeleton, Stack, Modal, TextInput, Pagination } from '@mantine/core';
 import { format } from 'date-fns';
 import { getGameHistory, deleteGame, editGame } from '../services/api';
 
@@ -19,12 +19,15 @@ interface Game {
   timestamp: string;
 }
 
+const GAMES_PER_PAGE = 25;
+
 const FullGameHistoryPage: React.FC = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [editModalOpened, setEditModalOpened] = useState(false);
   const [gameForm, setGameForm] = useState({ player1: '', player2: '', player1score: 0, player2score: 0});
+  const [activePage, setActivePage] = useState<number>(1);
 
   useEffect(() => {
     const fetchGames = async () => {
@@ -78,6 +81,10 @@ const FullGameHistoryPage: React.FC = () => {
     }
   };
 
+  const totalPages = Math.ceil(games.length / GAMES_PER_PAGE);
+
+  const paginatedGames = games.slice((activePage - 1) * GAMES_PER_PAGE, activePage * GAMES_PER_PAGE);
+
   return (
     <>
     <Stack>
@@ -101,7 +108,7 @@ const FullGameHistoryPage: React.FC = () => {
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {games.map((game) => (
+          {paginatedGames.map((game) => (
             <Table.Tr key={game.id} onClick={() => handleGameSelect(game)}>
               <>
                 <Table.Td>
@@ -132,6 +139,17 @@ const FullGameHistoryPage: React.FC = () => {
           ))}
         </Table.Tbody>
       </Table>
+
+      <Group justify="center" mt="md">
+          <Pagination
+            value={activePage}
+            onChange={setActivePage}
+            total={totalPages}
+            siblings={1}
+            boundaries={1}
+          />
+        </Group>
+
     </Stack>
 
     <Modal opened={editModalOpened} onClose={() => setEditModalOpened(false)} title="Edit Game Result">

@@ -169,7 +169,7 @@ export function HomePage() {
             />
             {viewHome && (
             <Stack align="flex-start">
-              <RankingsList refresh={refresh} />
+              <RankingsList refresh={refresh} players={players} />
               <GameHistory refresh={refresh} />
             </Stack>
           )}
