@@ -49,7 +49,7 @@ const GameHistory: React.FC<GameHistoryProps> = ({ refresh }) => {
 
   return (
     <div>
-      <Title order={2}>Recent Game Results</Title>
+      <Title order={1}>Recent Game Results</Title>
       <Table highlightOnHover>
         <Table.Thead>
           <Table.Tr>

@@ -6,10 +6,12 @@ import { IconPointFilled } from '@tabler/icons-react';
 import { Player } from '@/types';  // Import Player from types.ts
 
 interface FullPlayersPageProps {
-  setPlayersRefresh: React.Dispatch<React.SetStateAction<boolean>>;  // Add prop for refresh
+  setPlayersRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+  players: Player[];
+  onPlayerClick: (player: Player) => void;
 }
 
-const FullPlayersPage: React.FC<FullPlayersPageProps> = ({ setPlayersRefresh }) => {
+const FullPlayersPage: React.FC<FullPlayersPageProps> = ({ onPlayerClick, setPlayersRefresh }) => {
   const [removeModalOpened, setRemoveModalOpened] = useState(false);
   const [reactivateModalOpened, setReactivateModalOpened] = useState(false);
   const [deleteModalOpened, setDeleteModalOpened] = useState(false);
@@ -71,6 +73,9 @@ const FullPlayersPage: React.FC<FullPlayersPageProps> = ({ setPlayersRefresh }) 
     <>
       <Title>Players</Title>
       <Group>
+        <Button onClick={() => selectedActivePlayer && onPlayerClick(selectedActivePlayer)} disabled={!selectedActivePlayer}>
+          View Profile
+        </Button>
         <Button onClick={() => setRemoveModalOpened(true)} disabled={!selectedActivePlayer}>
           Remove Player
         </Button>

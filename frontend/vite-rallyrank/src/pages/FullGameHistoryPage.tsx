@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, Checkbox, Button, Group, Stack, Modal, TextInput, Pagination, CheckboxProps } from '@mantine/core';
+import { Table, Checkbox, Button, Group, Stack, Modal, TextInput, Pagination, CheckboxProps, Title } from '@mantine/core';
 import { format } from 'date-fns';
 import { useGameManagement } from '@/hooks/useGameManagement';
 import { IconPointFilled } from '@tabler/icons-react';
@@ -66,6 +66,7 @@ const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefre
 
   return (
     <>
+      <Title order={1}>Game Results</Title>
       <Stack>
         <Group>
           <Button onClick={() => setEditModalOpened(true)} disabled={!selectedGame}>
@@ -97,7 +98,6 @@ const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefre
                     aria-label="Select row"
                     radius="xl"
                     icon={CheckboxIcon}
-                    defaultChecked
                   />
                 </Table.Td>
                 <Table.Td>{formatDateTime(game.timestamp).date}</Table.Td>
