@@ -10,13 +10,12 @@ import { getPlayerTitle } from '@/utils/titles';
 
 interface PlayerProfileProps {
   player: Player;
-  rank: number;
   onBack: () => void;
   players: Player[];  // Pass all players to calculate the rank dynamically
   games: Game[];  // Pass the full list of games
 }
 
-const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, rank, onBack, players, games }) => {
+const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack, players, games }) => {
   // Calculate stats using the utility functions
   const { wins, losses } = calculateWinLossRecord(games, player.name);
   const { avgPlayerScore, avgOpponentScore } = calculateAverageGameScore(games, player.name);

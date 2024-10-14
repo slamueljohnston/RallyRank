@@ -190,7 +190,6 @@ export function HomePage() {
                 <PlayerProfile
                   player={selectedPlayer}
                   onBack={handleBack}
-                  rank={1}  // Example rank, this would be dynamic
                   players={players}  // Pass the players array to calculate rank
                   games={games}  // Pass the full list of games for calculating player stats
                 />
