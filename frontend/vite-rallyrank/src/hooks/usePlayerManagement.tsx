@@ -1,13 +1,7 @@
 import { useState, useEffect } from 'react';
 import { addPlayer, removePlayer, reactivatePlayer, getPlayers, addGameResult, deletePlayer } from '../services/api';
 import { showNotification } from '@mantine/notifications';
-
-interface Player {
-  id: number;
-  name: string;
-  rating: number;
-  is_active: boolean;
-}
+import { Player } from '../types';
 
 export const usePlayerManagement = () => {
   const [players, setPlayers] = useState<Player[]>([]);

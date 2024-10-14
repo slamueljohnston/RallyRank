@@ -1,6 +1,5 @@
-import { ColorSchemeToggle } from '../components/toggles/ColorSchemeToggle';
-import React, { useState, useEffect } from 'react';
-import { AppShell, Text, Burger, Title, Button, Modal, TextInput, Group, Stack, Select, createTheme, MantineProvider, Image, NavLink } from '@mantine/core';
+import React, { useState } from 'react';
+import { AppShell, Burger, Button, Group, Stack, createTheme, MantineProvider, Image, NavLink } from '@mantine/core';
 import { IconPingPong, IconListNumbers, IconHome } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 
@@ -9,37 +8,17 @@ import RankingsList from '../components/RankingsList';
 import GameHistory from '../components/GameHistory';
 import AddPlayerModal from '../components/modals/AddPlayerModal';
 import AddGameResultModal from '../components/modals/AddGameResultModal';
+import { ColorSchemeToggle } from '../components/toggles/ColorSchemeToggle';
+import { GitHubLink } from '@/components/toggles/GitHubLink';
 
 // Pages
 import FullGameHistoryPage from './FullGameHistoryPage';
 import FullPlayersPage from './FullPlayersPage';
 
-import { usePlayerManagement } from '../playerManagement/usePlayerManagement';
+import { usePlayerManagement } from '../hooks/usePlayerManagement';
+import { useGameManagement } from '@/hooks/useGameManagement';
 import { useDisclosure } from '@mantine/hooks';
 import logo from "./RallyRankLogo.png";
-import { GitHubLink } from '@/components/toggles/GitHubLink';
-
-interface Player {
-  id: number;
-  name: string;
-  rating: number;
-  is_active: boolean;
-}
-
-interface GameFormValues {
-  player1: string;
-  player2: string;
-  player1score: number;
-  player2score: number;
-}
-
-interface AddPlayerFormValues {
-  playerName: string;
-}
-
-interface RemovePlayerFormValues {
-  selectedPlayer: string;
-}
 
 const theme = createTheme({
   colors: {
@@ -59,33 +38,27 @@ export function HomePage() {
   const [addModalOpened, setAddModalOpened] = useState(false);
   const [gameModalOpened, setGameModalOpened] = useState(false);
 
-  // Hook for player management
+  // Hooks for player and game management
   const {
     players,
     inactivePlayers,
-    loading,
+    loading: playersLoading,
     handleAddPlayer,
-    handleRemovePlayer,
-    handleReactivatePlayer,
-    handleAddGameResult,
-    refresh,
-    setRefresh
+    refresh: playersRefresh,
+    setRefresh: setPlayersRefresh,
   } = usePlayerManagement();
 
+  const {
+    games,
+    loading: gamesLoading,
+    handleAddGameResult,
+    refresh: gamesRefresh,
+    setRefresh: setGamesRefresh,
+  } = useGameManagement();
+
   // Forms for game results and player management
-  const gameForm = useForm<GameFormValues>({ initialValues: { player1: '', player2: '', player1score: 0, player2score: 0 } });
-  const playerForm = useForm<AddPlayerFormValues>({
-    initialValues: {
-      playerName: '',
-    },
-    validate: {
-      playerName: (value) => {
-        const playerExists = players.concat(inactivePlayers).find((player) => player.name.toLowerCase() === value.toLowerCase());
-        return value.trim() === '' ? 'Player name cannot be blank' : playerExists ? 'Player already exists' : null;
-      },
-    },
-  });
-  const removeForm = useForm<RemovePlayerFormValues>({ initialValues: { selectedPlayer: '' } });
+  const gameForm = useForm({ initialValues: { player1: '', player2: '', player1score: 0, player2score: 0 } });
+  const playerForm = useForm({ initialValues: { playerName: '' } });
   
   return (
     <MantineProvider theme={theme}>
@@ -156,26 +129,29 @@ export function HomePage() {
               opened={addModalOpened}
               onClose={() => setAddModalOpened(false)}
               handleAddPlayer={(playerName) => handleAddPlayer(playerName, setAddModalOpened, playerForm.reset)}
-              loading={loading}
+              loading={playersLoading}
               form={playerForm}
             />
             <AddGameResultModal
               opened={gameModalOpened}
               onClose={() => setGameModalOpened(false)}
               handleAddGameResult={() => handleAddGameResult(gameForm, setGameModalOpened, gameForm.reset)}
-              loading={loading}
+              loading={gamesLoading}
               form={gameForm}
               players={players.map(player => ({ value: player.id.toString(), label: player.name }))}
             />
-            {viewHome && (
-            <Stack align="flex-start">
-              <RankingsList refresh={refresh} players={players} />
-              <GameHistory refresh={refresh} />
-            </Stack>
-          )}
-          {viewGameHistory && <FullGameHistoryPage />}  {/* Show full game history if selected */}
-
-          {viewFullRankings && <FullPlayersPage />}  {/* Show full players if selected */}
+            <div style={{ display: viewHome ? 'block' : 'none'}}>
+              <Stack align="flex-start">
+                <RankingsList refresh={playersRefresh} players={players} />
+                <GameHistory refresh={gamesRefresh} />
+              </Stack>
+            </div>
+            <div style={{ display: viewFullRankings ? 'block' : 'none'}}>
+              <FullPlayersPage setPlayersRefresh={setPlayersRefresh}/>
+            </div>
+            <div style={{ display: viewGameHistory ? 'block' : 'none'}}>
+              <FullGameHistoryPage setGamesRefresh={setGamesRefresh} />
+            </div>
           </Stack>
         </AppShell.Main>
       </AppShell>
