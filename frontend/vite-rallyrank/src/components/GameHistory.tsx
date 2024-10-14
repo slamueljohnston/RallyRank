@@ -37,10 +37,6 @@ const GameHistory: React.FC<GameHistoryProps> = ({ refresh }) => {
     fetchGames();
   }, [refresh]);
 
-  if (loading) {
-    return <Loader />;
-  }
-
   if (error) {
     return <Text color="red">{error}</Text>;
   }

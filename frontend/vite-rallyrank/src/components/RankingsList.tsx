@@ -32,7 +32,7 @@ const RankingsList: React.FC<RankingsListProps> = ({ refresh, players, onPlayerC
   }, [refresh]);
 
   if (loading) {
-    return <Loader />;
+    return <Text >RallyRank is loading ... Go play some Ping Pong!</Text>;
   }
 
   if (error) {

@@ -45,7 +45,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, rank, onBack, pla
         rank={playerRank}  // Display the player's actual rank
         rating={player.rating}
         avgGameScore={`${avgPlayerScore.toFixed(0)} - ${avgOpponentScore.toFixed(0)}`}
-        biggestWin={`${biggestWin?.playerScore}-${biggestWin?.opponentScore} vs ${biggestWin?.opponent}`}
+        biggestWin={biggestWin ? `${biggestWin.playerScore}-${biggestWin.opponentScore} vs ${biggestWin.opponent}` : 'N/A'}
       />
 
       <SimpleGrid cols={{ base: 1, md: 2 }}>
