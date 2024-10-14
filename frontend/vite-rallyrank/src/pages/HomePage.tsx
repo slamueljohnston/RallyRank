@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppShell, Burger, Button, Group, Stack, createTheme, MantineProvider, Image, NavLink } from '@mantine/core';
+import { AppShell, Burger, Button, Group, Stack, MantineProvider, Image, NavLink } from '@mantine/core';
 import { IconPingPong, IconListNumbers, IconHome } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { Player } from '../types';
@@ -22,15 +22,7 @@ import { useGameManagement } from '@/hooks/useGameManagement';
 import { useDisclosure } from '@mantine/hooks';
 import logo from "./RallyRankLogo.png";
 
-const theme = createTheme({
-  colors: {
-    'ag-turqoise': ["#ebfeff", "#d7fbfd", "#aaf8fc", "#7df6fc", "#62f4fb", "#56f2fb", "#4ef2fb", "#41d7e0", "#2fbfc7", "#00a6ad"],
-  },
-  fontFamily: '"IBM Plex Mono", system-ui',
-  headings: {fontFamily: '"IBM Plex Mono", system-ui'},
-  defaultRadius: 'md',
-  primaryColor: 'ag-turqoise'
-})
+import theme from '../theme';
 
 export function HomePage() {
   const [viewHome, setViewHome] = useState(true);
