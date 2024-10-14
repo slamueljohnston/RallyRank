@@ -73,12 +73,13 @@ export const getPlayerGameHistory = (games: Game[], playerName: string) => {
 
 // Calculate biggest win based on point difference
 export const calculateBiggestWinLoss = (games: Game[], playerName: string): { biggestWin: BiggestWin | null } => {
+    const playerGames = getPlayerGameHistory(games, playerName);
     let biggestWin: BiggestWin | null = null;
 
     console.log("Calculating Biggest Win for:");
     console.log(playerName);
     
-    games.forEach((game) => {
+    playerGames.forEach((game) => {
 
       console.log("Current Biggest Win:");
       console.log(biggestWin);
