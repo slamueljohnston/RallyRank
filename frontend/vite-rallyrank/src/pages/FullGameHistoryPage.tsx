@@ -74,6 +74,7 @@ const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefre
           </Button>
         </Group>
 
+        <Table.ScrollContainer minWidth={500}>
         <Table highlightOnHover>
           <Table.Thead>
             <Table.Tr>
@@ -120,6 +121,7 @@ const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefre
             ))}
           </Table.Tbody>
         </Table>
+        </Table.ScrollContainer>
 
         <Group justify="center" mt="md">
           <Pagination

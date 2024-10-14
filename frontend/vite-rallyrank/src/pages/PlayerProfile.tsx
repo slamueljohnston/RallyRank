@@ -37,7 +37,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack, players, 
 
   return (
     <Stack gap="lg">
-      <Group justify="space-between">
+      <Group justify="space-between" wrap='nowrap'>
         <Group>
           <Avatar color="blue" size="lg">{player.name.charAt(0)}</Avatar>
           <Title>{player.name}</Title>

@@ -112,12 +112,12 @@ export function HomePage() {
         padding="md"
       >
         <AppShell.Header>
-          <Group h="100%" px="md" justify="space-between">
-            <Group h="100%" px="md">
+          <Group h="100%" px="md" justify="space-between" wrap='nowrap'>
+            <Group h="100%" px="md" wrap='nowrap'>
               <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
               <Image src={logo} h={80}/>
             </Group>
-            <Group justify="flex-end">
+            <Group justify="flex-end" wrap='nowrap'>
               <GitHubLink />
               <ColorSchemeToggle />
             </Group>
