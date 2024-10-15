@@ -199,6 +199,20 @@ const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefre
                 >
                   Player 2 Score
                 </Th>
+                <Th
+                  sorted={sortBy === 'rating_change_player1'}
+                  reversed={reverseSortDirection}
+                  onSort={() => setSorting('rating_change_player1')}
+                >
+                  Player 1 Rating Change
+                </Th>
+                <Th
+                  sorted={sortBy === 'rating_change_player2'}
+                  reversed={reverseSortDirection}
+                  onSort={() => setSorting('rating_change_player2')}
+                >
+                  Player 2 Rating Change
+                </Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -218,6 +232,16 @@ const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefre
                   <Table.Td>{game.player1_score}</Table.Td>
                   <Table.Td>{game.player2_name}</Table.Td>
                   <Table.Td>{game.player2_score}</Table.Td>
+                  <Table.Td>
+                    {game.player1_name}: {game.prior_rating_player1} →{' '}
+                    {game.prior_rating_player1 + game.rating_change_player1} (
+                    {game.rating_change_player1 >= 0 ? `+${game.rating_change_player1}` : game.rating_change_player1})
+                  </Table.Td>
+                  <Table.Td>
+                    {game.player2_name}: {game.prior_rating_player2} →{' '}
+                    {game.prior_rating_player2 + game.rating_change_player2} (
+                    {game.rating_change_player2 >= 0 ? `+${game.rating_change_player2}` : game.rating_change_player2})
+                  </Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
