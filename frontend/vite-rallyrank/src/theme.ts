@@ -17,15 +17,6 @@ const theme = createTheme({
   defaultRadius: 'md',
   primaryColor: 'ag-turqoise',
 
-  // Define responsive breakpoints
-  breakpoints: {
-    xs: '500',  // Mobile
-    sm: '768',  // Small screens
-    md: '992',  // Medium screens
-    lg: '1200',  // Large screens
-    xl: '1400',  // Extra large screens
-  },
-
   // Add responsive styles for mobile, small screens, etc.
   other: {
     responsiveStyles: {

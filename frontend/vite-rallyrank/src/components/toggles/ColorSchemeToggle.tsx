@@ -1,4 +1,4 @@
-import { ActionIcon, Group, useMantineColorScheme, HoverCard } from '@mantine/core';
+import { ActionIcon, Group, useMantineColorScheme, Tooltip } from '@mantine/core';
 import { IconSun, IconMoonStars } from '@tabler/icons-react';
 
 export function ColorSchemeToggle() {
@@ -6,20 +6,15 @@ export function ColorSchemeToggle() {
   const isDark = colorScheme === 'dark';
 
   return (
-    <HoverCard shadow='md' openDelay={500}>
-      <HoverCard.Target>
-        <ActionIcon
-          variant="outline"
-          color={isDark ? 'white' : 'black'}
-          onClick={() => toggleColorScheme()}
-          size="lg"
-        >
-          {isDark ? <IconSun size="1.2rem" stroke={1.5}/> : <IconMoonStars size="1.2rem" stroke={1.5}/>}  {/* Sun/Moon icons based on mode */}
-        </ActionIcon>
-      </HoverCard.Target>
-      <HoverCard.Dropdown>
-        {isDark ? 'Light Mode' : 'Dark Mode'}
-      </HoverCard.Dropdown>
-    </HoverCard>
+    <Tooltip label={isDark ? 'Light Mode' : 'Dark Mode'} position='bottom'>
+      <ActionIcon
+        variant="outline"
+        color={isDark ? 'white' : 'black'}
+        onClick={() => toggleColorScheme()}
+        size="lg"
+      >
+        {isDark ? <IconSun size="1.2rem" stroke={1.5}/> : <IconMoonStars size="1.2rem" stroke={1.5}/>}  {/* Sun/Moon icons based on mode */}
+      </ActionIcon>
+    </Tooltip>
   );
 }

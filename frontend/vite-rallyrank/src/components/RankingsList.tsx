@@ -53,7 +53,7 @@ const RankingsList: React.FC<RankingsListProps> = ({ refresh, players, onPlayerC
         </Table.Thead>
         <Table.Tbody>
           {rankings.map((player, index) => (
-            <Table.Tr key={player.id} onClick={() => onPlayerClick(player)}>
+            <Table.Tr key={player.id} onClick={() => onPlayerClick(player)} style={{ cursor: 'pointer' }}>
               <Table.Td>{index + 1}</Table.Td>
               <Table.Td>{getPlayerTitle(index + 1, totalPlayers)}</Table.Td>
               <Table.Td>{player.name}</Table.Td>

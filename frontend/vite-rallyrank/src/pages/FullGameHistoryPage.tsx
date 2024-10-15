@@ -1,14 +1,77 @@
 import React, { useState } from 'react';
-import { Table, Checkbox, Button, Group, Stack, Modal, TextInput, Pagination, CheckboxProps, Title } from '@mantine/core';
+import {
+  Table,
+  Checkbox,
+  CheckboxProps,
+  Button,
+  Group,
+  Stack,
+  Modal,
+  TextInput,
+  Pagination,
+  ScrollArea,
+  Text,
+  Title,
+  UnstyledButton,
+  Center,
+  rem,
+} from '@mantine/core';
 import { format } from 'date-fns';
 import { useGameManagement } from '@/hooks/useGameManagement';
-import { IconPointFilled } from '@tabler/icons-react';
-import { Game } from '../types';  // Import Game from types.ts
+import { IconPointFilled, IconSelector, IconChevronDown, IconChevronUp, IconSearch } from '@tabler/icons-react';
+import { Game } from '../types';
 
 const GAMES_PER_PAGE = 25;
 
 interface FullGameHistoryPageProps {
-  setGamesRefresh: React.Dispatch<React.SetStateAction<boolean>>;  // Add prop for refresh
+  setGamesRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+// Sorting table headers
+function Th({ children, reversed, sorted, onSort }: any) {
+  const Icon = sorted ? (reversed ? IconChevronUp : IconChevronDown) : IconSelector;
+  return (
+    <Table.Th>
+      <UnstyledButton onClick={onSort}>
+        <Group justify="space-between">
+          <Text fw={500} size="sm">{children}</Text>
+          <Center>
+            <Icon style={{ width: rem(16), height: rem(16) }} stroke={1.5} />
+          </Center>
+        </Group>
+      </UnstyledButton>
+    </Table.Th>
+  );
+}
+
+// Filter data based on search
+function filterData(data: Game[], search: string) {
+  const query = search.toLowerCase().trim();
+  return data.filter((game) =>
+    game.player1_name.toLowerCase().includes(query) ||
+    game.player2_name.toLowerCase().includes(query) ||
+    game.player1_score.toString().includes(query) ||
+    game.player2_score.toString().includes(query)
+  );
+}
+
+// Sort data
+function sortData(
+  data: Game[],
+  { sortBy, reversed, search }: { sortBy: keyof Game | null; reversed: boolean; search: string }
+) {
+  if (!sortBy) {
+    return filterData(data, search);
+  }
+
+  const sorted = [...data].sort((a, b) => {
+    if (reversed) {
+      return b[sortBy]?.toString().localeCompare(a[sortBy]?.toString());
+    }
+    return a[sortBy]?.toString().localeCompare(b[sortBy]?.toString());
+  });
+
+  return filterData(sorted, search);
 }
 
 const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefresh }) => {
@@ -17,6 +80,21 @@ const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefre
   const [editModalOpened, setEditModalOpened] = useState(false);
   const [gameForm, setGameForm] = useState({ player1: '', player2: '', player1score: 0, player2score: 0 });
   const [activePage, setActivePage] = useState<number>(1);
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState<keyof Game | null>(null);
+  const [reverseSortDirection, setReverseSortDirection] = useState(false);
+
+  const setSorting = (field: keyof Game) => {
+    const reversed = field === sortBy ? !reverseSortDirection : false;
+    setReverseSortDirection(reversed);
+    setSortBy(field);
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.currentTarget.value);
+  };
+
+  const filteredGames = sortData(games, { sortBy, reversed: reverseSortDirection, search });
 
   const formatDateTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -47,7 +125,7 @@ const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefre
         { player1_score: gameForm.player1score, player2_score: gameForm.player2score }
       );
       setEditModalOpened(false);
-      setGamesRefresh((prev) => !prev);  // Trigger global refresh after editing a game
+      setGamesRefresh((prev) => !prev);
     }
   };
 
@@ -55,14 +133,13 @@ const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefre
     if (selectedGame) {
       await handleDeleteGame(selectedGame.id);
       setEditModalOpened(false);
-      setGamesRefresh((prev) => !prev);  // Trigger global refresh after deleting a game
+      setGamesRefresh((prev) => !prev);
     }
   };
 
+  const totalPages = Math.ceil(filteredGames.length / GAMES_PER_PAGE);
+  const paginatedGames = filteredGames.slice((activePage - 1) * GAMES_PER_PAGE, activePage * GAMES_PER_PAGE);
   const CheckboxIcon: CheckboxProps['icon'] = ({ ...others }) => <IconPointFilled {...others} />;
-
-  const totalPages = Math.ceil(games.length / GAMES_PER_PAGE);
-  const paginatedGames = games.slice((activePage - 1) * GAMES_PER_PAGE, activePage * GAMES_PER_PAGE);
 
   return (
     <>
@@ -74,53 +151,77 @@ const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefre
           </Button>
         </Group>
 
+        <TextInput
+          placeholder="Search for a Player"
+          mb="md"
+          leftSection={<IconSearch size={16} />}
+          value={search}
+          onChange={handleSearchChange}
+        />
+
         <Table.ScrollContainer minWidth={500}>
-        <Table highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th />
-              <Table.Th>Date</Table.Th>
-              <Table.Th>Time</Table.Th>
-              <Table.Th>Player 1 Name</Table.Th>
-              <Table.Th>Player 1 Score</Table.Th>
-              <Table.Th>Player 2 Name</Table.Th>
-              <Table.Th>Player 2 Score</Table.Th>
-              <Table.Th>Player 1 Rating Change</Table.Th>
-              <Table.Th>Player 2 Rating Change</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {paginatedGames.map((game) => (
-              <Table.Tr key={game.id} onClick={() => handleGameSelect(game)}>
-                <Table.Td>
-                  <Checkbox
-                    checked={selectedGame?.id === game.id}
-                    onChange={() => handleGameSelect(game)}
-                    aria-label="Select row"
-                    radius="xl"
-                    icon={CheckboxIcon}
-                  />
-                </Table.Td>
-                <Table.Td>{formatDateTime(game.timestamp).date}</Table.Td>
-                <Table.Td>{formatDateTime(game.timestamp).time}</Table.Td>
-                <Table.Td>{game.player1_name}</Table.Td>
-                <Table.Td>{game.player1_score}</Table.Td>
-                <Table.Td>{game.player2_name}</Table.Td>
-                <Table.Td>{game.player2_score}</Table.Td>
-                <Table.Td>
-                  {game.player1_name}: {game.prior_rating_player1} →{' '}
-                  {game.prior_rating_player1 + game.rating_change_player1} (
-                  {game.rating_change_player1 >= 0 ? `+${game.rating_change_player1}` : game.rating_change_player1})
-                </Table.Td>
-                <Table.Td>
-                  {game.player2_name}: {game.prior_rating_player2} →{' '}
-                  {game.prior_rating_player2 + game.rating_change_player2} (
-                  {game.rating_change_player2 >= 0 ? `+${game.rating_change_player2}` : game.rating_change_player2})
-                </Table.Td>
+          <Table highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th />
+                <Th
+                  sorted={sortBy === 'timestamp'}
+                  reversed={reverseSortDirection}
+                  onSort={() => setSorting('timestamp')}
+                >
+                  Date
+                </Th>
+                <Th
+                  sorted={sortBy === 'player1_name'}
+                  reversed={reverseSortDirection}
+                  onSort={() => setSorting('player1_name')}
+                >
+                  Player 1 Name
+                </Th>
+                <Th
+                  sorted={sortBy === 'player1_score'}
+                  reversed={reverseSortDirection}
+                  onSort={() => setSorting('player1_score')}
+                >
+                  Player 1 Score
+                </Th>
+                <Th
+                  sorted={sortBy === 'player2_name'}
+                  reversed={reverseSortDirection}
+                  onSort={() => setSorting('player2_name')}
+                >
+                  Player 2 Name
+                </Th>
+                <Th
+                  sorted={sortBy === 'player2_score'}
+                  reversed={reverseSortDirection}
+                  onSort={() => setSorting('player2_score')}
+                >
+                  Player 2 Score
+                </Th>
               </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
+            </Table.Thead>
+            <Table.Tbody>
+              {paginatedGames.map((game) => (
+                <Table.Tr key={game.id} onClick={() => handleGameSelect(game)}>
+                  <Table.Td>
+                    <Checkbox
+                      checked={selectedGame?.id === game.id}
+                      onChange={() => handleGameSelect(game)}
+                      aria-label="Select row"
+                      radius="xl"
+                      icon={CheckboxIcon}
+                    />
+                  </Table.Td>
+                  <Table.Td>{formatDateTime(game.timestamp).date}</Table.Td>
+                  <Table.Td>{game.player1_name}</Table.Td>
+                  <Table.Td>{game.player1_score}</Table.Td>
+                  <Table.Td>{game.player2_name}</Table.Td>
+                  <Table.Td>{game.player2_score}</Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
         </Table.ScrollContainer>
 
         <Group justify="center" mt="md">
@@ -134,7 +235,6 @@ const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefre
         </Group>
       </Stack>
 
-      {/* Edit Game Modal */}
       <Modal opened={editModalOpened} onClose={() => setEditModalOpened(false)} title="Edit Game Result">
         <TextInput
           label={gameForm.player1}
