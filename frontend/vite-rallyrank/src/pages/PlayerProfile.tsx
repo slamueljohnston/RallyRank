@@ -22,12 +22,6 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack, players, 
   const { biggestWin } = calculateBiggestWinLoss(games, player.name);
   const ratingHistory = getRatingHistory(games, player.name);
 
-  console.log("Player Profile for:");
-  console.log(player.name);
-  console.log(biggestWin?.playerScore);
-  console.log(biggestWin?.opponent);
-  console.log(biggestWin?.opponentScore);
-
   // Calculate the player's actual rank by sorting players based on rating
   const sortedPlayers = [...players].sort((a, b) => b.rating - a.rating);
   const playerRank = sortedPlayers.findIndex((p) => p.id === player.id) + 1;  // Get the player's rank

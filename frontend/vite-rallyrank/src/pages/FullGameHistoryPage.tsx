@@ -18,6 +18,7 @@ import {
 } from '@mantine/core';
 import { format } from 'date-fns';
 import { useGameManagement } from '@/hooks/useGameManagement';
+import { usePlayerManagement } from '@/hooks/usePlayerManagement';
 import { IconPointFilled, IconSelector, IconChevronDown, IconChevronUp, IconSearch } from '@tabler/icons-react';
 import { Game } from '../types';
 
@@ -25,6 +26,7 @@ const GAMES_PER_PAGE = 25;
 
 interface FullGameHistoryPageProps {
   setGamesRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+  setPlayersRefresh: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 // Sorting table headers
@@ -74,8 +76,8 @@ function sortData(
   return filterData(sorted, search);
 }
 
-const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefresh }) => {
-  const { games, loading, handleDeleteGame, handleEditGame } = useGameManagement();
+const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefresh, setPlayersRefresh, }) => {
+  const { games, loading, handleDeleteGame, handleEditGame } = useGameManagement(setPlayersRefresh);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [editModalOpened, setEditModalOpened] = useState(false);
   const [gameForm, setGameForm] = useState({ player1: '', player2: '', player1score: 0, player2score: 0 });

@@ -8,18 +8,37 @@ import { Player } from '@/types';  // Import Player from types.ts
 interface FullPlayersPageProps {
   setPlayersRefresh: React.Dispatch<React.SetStateAction<boolean>>;
   players: Player[];
+  inactivePlayers: Player[];
+  handleRemovePlayer: (
+    playerId: number,
+    setRemoveModalOpened: (value: boolean) => void
+  ) => void;
+  handleReactivatePlayer: (
+    playerId: number,
+    setReactivateModalOpened: (value: boolean) => void
+  ) => void;
+  handleDeletePlayer: (
+    playerId: number,
+    setDeleteModalOpened: (value: boolean) => void
+  ) => void;
   onPlayerClick: (player: Player) => void;
 }
 
-const FullPlayersPage: React.FC<FullPlayersPageProps> = ({ onPlayerClick, setPlayersRefresh }) => {
+const FullPlayersPage: React.FC<FullPlayersPageProps> = ({
+  onPlayerClick,
+  setPlayersRefresh,
+  players,
+  inactivePlayers,
+  handleRemovePlayer,
+  handleReactivatePlayer,
+  handleDeletePlayer,
+}) => {
   const [removeModalOpened, setRemoveModalOpened] = useState(false);
   const [reactivateModalOpened, setReactivateModalOpened] = useState(false);
   const [deleteModalOpened, setDeleteModalOpened] = useState(false);
   const [selectedActivePlayer, setSelectedActivePlayer] = useState<Player | null>(null);  // Track selected active player
   const [selectedInactivePlayer, setSelectedInactivePlayer] = useState<Player | null>(null);  // Track selected inactive player
   const [inactiveVisible, setInactiveVisible] = useState(false);
-
-  const { handleRemovePlayer, handleReactivatePlayer, handleDeletePlayer, players, inactivePlayers } = usePlayerManagement();
 
   // Sort active players by rating
   const sortedPlayers = [...players].sort((a, b) => b.rating - a.rating);
@@ -47,7 +66,6 @@ const FullPlayersPage: React.FC<FullPlayersPageProps> = ({ onPlayerClick, setPla
   const handleRemove = () => {
     if (selectedActivePlayer) {
       handleRemovePlayer(selectedActivePlayer.id, setRemoveModalOpened);
-      setPlayersRefresh((prev) => !prev);  // Trigger global refresh after removing a player
     }
   };
 
@@ -55,7 +73,6 @@ const FullPlayersPage: React.FC<FullPlayersPageProps> = ({ onPlayerClick, setPla
   const handleReactivate = () => {
     if (selectedInactivePlayer) {
       handleReactivatePlayer(selectedInactivePlayer.id, setReactivateModalOpened);
-      setPlayersRefresh((prev) => !prev);  // Trigger global refresh after reactivating a player
     }
   };
 
@@ -63,7 +80,6 @@ const FullPlayersPage: React.FC<FullPlayersPageProps> = ({ onPlayerClick, setPla
   const handleDelete = () => {
     if (selectedInactivePlayer) {
       handleDeletePlayer(selectedInactivePlayer.id, setDeleteModalOpened);
-      setPlayersRefresh((prev) => !prev);  // Trigger global refresh after deleting a player
     }
   };
 

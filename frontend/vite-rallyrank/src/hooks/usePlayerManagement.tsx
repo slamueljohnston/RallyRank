@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { addPlayer, removePlayer, reactivatePlayer, getPlayers, addGameResult, deletePlayer } from '../services/api';
+import { addPlayer, removePlayer, reactivatePlayer, getPlayers, deletePlayer } from '../services/api';
 import { showNotification } from '@mantine/notifications';
 import { Player } from '../types';
 
@@ -8,7 +8,7 @@ export const usePlayerManagement = () => {
   const [inactivePlayers, setInactivePlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
   const [inactivePlayerId, setInactivePlayerId] = useState<number | null>(null);
-  const [refresh, setRefresh] = useState(false);
+  const [playersRefresh, setPlayersRefresh] = useState(false);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -19,7 +19,7 @@ export const usePlayerManagement = () => {
       setInactivePlayers(inactive);
     };
     fetchPlayers();
-  }, [refresh]);
+  }, [playersRefresh]);
 
   // Handle adding a player
   const handleAddPlayer = async (
@@ -42,7 +42,7 @@ export const usePlayerManagement = () => {
       console.error('Error adding player:', error);
     }
     setLoading(false);
-    setRefresh((prev) => !prev);  // Refresh the player list
+    setPlayersRefresh((prev) => !prev);  // Refresh the player list
   };  
 
   // Handle removing a player
@@ -57,7 +57,7 @@ export const usePlayerManagement = () => {
       console.error('Error removing player:', error);
     }
     setLoading(false);
-    setRefresh((prev) => !prev);  // Refresh the player list
+    setPlayersRefresh((prev) => !prev);  // Refresh the player list
   };
 
   // Handle permanently deleting a player and related games
@@ -69,12 +69,13 @@ export const usePlayerManagement = () => {
       await deletePlayer(playerId);
       showNotification({ message: 'Player and related games deleted successfully!', color: 'green' });
       setDeleteModalOpened(false);
-      setRefresh((prev) => !prev);  // Refresh the player list
+      setPlayersRefresh((prev) => !prev);  // Refresh the player list
     } catch (error) {
       console.error('Error deleting player:', error);
       showNotification({ message: 'Error deleting player', color: 'red' });
     }
     setLoading(false);
+    setPlayersRefresh((prev) => !prev);  // Refresh the player list
   };
 
   // Handle reactivating a player
@@ -92,39 +93,8 @@ export const usePlayerManagement = () => {
         showNotification({ message: 'Error reactivating player', color: 'red' });
       }
       setLoading(false);
-      setRefresh((prev) => !prev);  // Refresh the player list
+      setPlayersRefresh((prev) => !prev);  // Refresh the player list
     }
-  };
-
-  // Handle adding a game result
-  const handleAddGameResult = async (
-    gameForm: any,
-    setGameModalOpened: (value: boolean) => void,
-    resetForm: () => void
-    ) => {
-    const { player1, player2, player1score, player2score } = gameForm.values;
-    if (player1 === player2) {
-      showNotification({ message: 'A player cannot play against themselves!', color: 'red' });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await addGameResult({
-        player1_id: player1,
-        player2_id: player2,
-        player1_score: player1score,
-        player2_score: player2score,
-      });
-      showNotification({ message: 'Game added successfully!', color: 'green' });
-      setGameModalOpened(false);
-      resetForm();
-    } catch (error) {
-      console.error('Error adding game result:', error);
-      showNotification({ message: 'Error adding game result', color: 'red' });
-    }
-    setLoading(false);
-    setRefresh((prev) => !prev);  // Refresh the game history
   };
 
   return {
@@ -135,8 +105,7 @@ export const usePlayerManagement = () => {
     handleRemovePlayer,
     handleDeletePlayer,
     handleReactivatePlayer,
-    handleAddGameResult,
-    refresh,
-    setRefresh,
+    playersRefresh,
+    setPlayersRefresh,
   };
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppShell, Burger, Button, Group, Stack, MantineProvider, Image, NavLink } from '@mantine/core';
 import { IconPingPong, IconListNumbers, IconHome } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
@@ -41,8 +41,11 @@ export function HomePage() {
     inactivePlayers,
     loading: playersLoading,
     handleAddPlayer,
-    refresh: playersRefresh,
-    setRefresh: setPlayersRefresh,
+    handleRemovePlayer,
+    handleDeletePlayer,
+    handleReactivatePlayer,
+    playersRefresh,
+    setPlayersRefresh,
   } = usePlayerManagement();
 
   const {
@@ -51,7 +54,7 @@ export function HomePage() {
     handleAddGameResult,
     refresh: gamesRefresh,
     setRefresh: setGamesRefresh,
-  } = useGameManagement();
+  } = useGameManagement(setPlayersRefresh);
 
   // Forms for game results and player management
   const gameForm = useForm({ initialValues: { player1: '', player2: '', player1score: 0, player2score: 0 } });
@@ -172,10 +175,21 @@ export function HomePage() {
               <GameHistory refresh={gamesRefresh} />
             </div>
             <div style={{ display: viewFullRankings ? 'block' : 'none'}}>
-              <FullPlayersPage setPlayersRefresh={setPlayersRefresh} players={players} onPlayerClick={handlePlayerProfile}/>
+              <FullPlayersPage
+                setPlayersRefresh={setPlayersRefresh}
+                players={players}
+                inactivePlayers={inactivePlayers}
+                handleRemovePlayer={handleRemovePlayer}
+                handleReactivatePlayer={handleReactivatePlayer}
+                handleDeletePlayer={handleDeletePlayer}
+                onPlayerClick={handlePlayerProfile}
+              />
             </div>
             <div style={{ display: viewGameHistory ? 'block' : 'none'}}>
-              <FullGameHistoryPage setGamesRefresh={setGamesRefresh} />
+              <FullGameHistoryPage 
+                setGamesRefresh={setGamesRefresh}
+                setPlayersRefresh={setPlayersRefresh}
+              />
             </div>
             <div style={{ display: viewPlayerProfile ? 'block' : 'none' }}>
               {selectedPlayer && (
