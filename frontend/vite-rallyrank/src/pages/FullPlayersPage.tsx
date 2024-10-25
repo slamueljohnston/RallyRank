@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '@/AuthContext';
 import { Table, Checkbox, Title, Text, Button, Group, Stack, Modal, Collapse, CheckboxProps } from '@mantine/core';
 import { usePlayerManagement } from '@/hooks/usePlayerManagement';
 import { getPlayerTitle } from '@/utils/titles';
@@ -39,6 +40,7 @@ const FullPlayersPage: React.FC<FullPlayersPageProps> = ({
   const [selectedActivePlayer, setSelectedActivePlayer] = useState<Player | null>(null);  // Track selected active player
   const [selectedInactivePlayer, setSelectedInactivePlayer] = useState<Player | null>(null);  // Track selected inactive player
   const [inactiveVisible, setInactiveVisible] = useState(false);
+  const { authenticated } = useContext(AuthContext);
 
   // Sort active players by rating
   const sortedPlayers = [...players].sort((a, b) => b.rating - a.rating);
@@ -92,9 +94,11 @@ const FullPlayersPage: React.FC<FullPlayersPageProps> = ({
         <Button onClick={() => selectedActivePlayer && onPlayerClick(selectedActivePlayer)} disabled={!selectedActivePlayer}>
           View Profile
         </Button>
+        {authenticated && (
         <Button onClick={() => setRemoveModalOpened(true)} disabled={!selectedActivePlayer}>
           Remove Player
         </Button>
+        )}
       </Group>
 
       <Group>
@@ -153,14 +157,16 @@ const FullPlayersPage: React.FC<FullPlayersPageProps> = ({
 
         <Title mt="lg">Inactive Players</Title>
 
-        <Group>
-          <Button onClick={() => setReactivateModalOpened(true)} disabled={!selectedInactivePlayer}>
-            Reactivate Player
-          </Button>
-          <Button color="red" onClick={() => setDeleteModalOpened(true)} disabled={!selectedInactivePlayer}>
-            Delete Player
-          </Button>
-        </Group>
+        {authenticated && (
+          <Group>
+            <Button onClick={() => setReactivateModalOpened(true)} disabled={!selectedInactivePlayer}>
+              Reactivate Player
+            </Button>
+            <Button color="red" onClick={() => setDeleteModalOpened(true)} disabled={!selectedInactivePlayer}>
+              Delete Player
+            </Button>
+          </Group>
+        )}
 
         <Table highlightOnHover>
           <Table.Thead>

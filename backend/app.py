@@ -1,6 +1,6 @@
 import os
 import sys
-from flask import Flask, jsonify, request, abort
+from flask import Flask, jsonify, request, abort, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 from datetime import datetime
@@ -10,15 +10,24 @@ from sqlalchemy.exc import SQLAlchemyError
 from flask_migrate import Migrate
 from config import DevelopmentConfig, ProductionConfig
 from dotenv import load_dotenv
+from functools import wraps
 
 load_dotenv()
 
 app = Flask(__name__)
 
+# Set the secret key for session management
+app.secret_key = os.environ.get('SECRET_KEY', 'your_default_secret_key')
+
+# Load admin password from environment variables
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
+if not ADMIN_PASSWORD:
+    raise ValueError("No ADMIN_PASSWORD set for Flask application. Please set it in the environment variables.")
+
 if os.getenv('FLASK_ENV') == 'development':
-    CORS(app, origins=["http://localhost:5173"])
+    CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
 else:
-    CORS(app, origins=["https://slamueljohnston.github.io"])
+    CORS(app, origins=["https://slamueljohnston.github.io"], supports_credentials=True)
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -28,6 +37,10 @@ if os.getenv('FLASK_ENV') == 'development':
     app.config.from_object(DevelopmentConfig)
 else:
     app.config.from_object(ProductionConfig)
+
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_TYPE'] = 'filesystem'
 
 # Configure PostgreSQL database
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -57,6 +70,14 @@ class Game(db.Model):
     prior_rating_player2 = db.Column(db.Integer, nullable=False, default = 1000)
     rating_change_player1 = db.Column(db.Integer, nullable=False, default = 0)
     rating_change_player2 = db.Column(db.Integer, nullable=False, default =0)
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('authenticated'):
+            return jsonify({'message': 'Authentication required.'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
 
 # Create tables before handling the first request
 @app.before_request
@@ -92,6 +113,7 @@ def get_player(player_id):
 
 # Add a new player
 @app.route('/players', methods=['POST'])
+@login_required
 def add_player():
     data = request.get_json()
     if not data or 'name' not in data:
@@ -112,6 +134,7 @@ def add_player():
 
 # Reactivate an inactive player
 @app.route('/players/reactivate/<int:player_id>', methods=['POST'])
+@login_required
 def reactivate_player(player_id):
     player = Player.query.get(player_id)
     if not player or player.is_active:
@@ -123,6 +146,7 @@ def reactivate_player(player_id):
 
 # Remove a player
 @app.route('/players/<int:player_id>', methods=['DELETE'])
+@login_required
 def remove_player(player_id):
     player = Player.query.get(player_id)
     if not player:
@@ -133,6 +157,7 @@ def remove_player(player_id):
 
 # Delete a player permanently
 @app.route('/players/<int:player_id>/delete', methods=['DELETE'])
+@login_required
 def delete_player(player_id):
     player = Player.query.get(player_id)
     if not player:
@@ -153,6 +178,7 @@ def get_rankings():
 
 # Submit game results
 @app.route('/games', methods=['POST'])
+@login_required
 def add_game():
     try:
         data = request.get_json()
@@ -265,6 +291,7 @@ def get_games():
 
 # Delete a game
 @app.route('/games/<int:game_id>', methods=['DELETE'])
+@login_required
 def delete_game(game_id):
     game = Game.query.get(game_id)
     if not game:
@@ -284,6 +311,7 @@ def delete_game(game_id):
 
 # Edit a game
 @app.route('/games/<int:game_id>', methods=['PUT'])
+@login_required
 def edit_game(game_id):
     game = Game.query.get(game_id)
     if not game:
@@ -374,6 +402,25 @@ def get_player_stats(player_id):
         "wins": wins,
         "losses": losses
     }), 200
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    password = data.get('password')
+    if password == ADMIN_PASSWORD:
+        session['authenticated'] = True
+        return jsonify({'message': 'Logged in successfully.'}), 200
+    else:
+        return jsonify({'message': 'Invalid password.'}), 401
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('authenticated', None)
+    return jsonify({'message': 'Logged out successfully.'}), 200
+
+@app.route('/auth_status', methods=['GET'])
+def auth_status():
+    return jsonify({'authenticated': session.get('authenticated', False)}), 200
 
 # Define routes (e.g., /players, /games, etc.)
 @app.route('/')

@@ -5,9 +5,10 @@ const API_BASE_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:5000'  // Use local backend for development
   : 'https://rallyrank.onrender.com';  // Use production backend when deployed
 
-export const api = axios.create({
-  baseURL: API_BASE_URL,
-});
+axios.defaults.baseURL = API_BASE_URL;
+axios.defaults.withCredentials = true;  // Add this line
+
+export const api = axios.create();
 
 // Fetch Rankings
 export const getRankings = async () => {

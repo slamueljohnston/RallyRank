@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '@/AuthContext';
 import {
   Table,
   Checkbox,
@@ -85,6 +86,7 @@ const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefre
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<keyof Game | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
+  const { authenticated } = useContext(AuthContext);
 
   const setSorting = (field: keyof Game) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
@@ -147,11 +149,16 @@ const FullGameHistoryPage: React.FC<FullGameHistoryPageProps> = ({ setGamesRefre
     <>
       <Title order={1}>Game Results</Title>
       <Stack>
-        <Group>
-          <Button onClick={() => setEditModalOpened(true)} disabled={!selectedGame}>
-            Edit Game Result
-          </Button>
-        </Group>
+      {authenticated && (
+          <Group>
+            <Button
+              onClick={() => setEditModalOpened(true)}
+              disabled={!selectedGame}
+            >
+              Edit Game Result
+            </Button>
+          </Group>
+        )}
 
         <TextInput
           placeholder="Search for a Player"

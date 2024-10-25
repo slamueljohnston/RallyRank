@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '@/AuthContext';
 import { addPlayer, removePlayer, reactivatePlayer, getPlayers, deletePlayer } from '../services/api';
 import { showNotification } from '@mantine/notifications';
 import { Player } from '../types';
@@ -9,6 +10,7 @@ export const usePlayerManagement = () => {
   const [loading, setLoading] = useState(false);
   const [inactivePlayerId, setInactivePlayerId] = useState<number | null>(null);
   const [playersRefresh, setPlayersRefresh] = useState(false);
+  const { setAuthenticated } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -38,11 +40,18 @@ export const usePlayerManagement = () => {
         setAddModalOpened(false);
         resetForm();
       }
-    } catch (error) {
-      console.error('Error adding player:', error);
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        setAuthenticated(false);
+        localStorage.removeItem('authenticated');
+        showNotification({ message: 'Session expired. Please log in again.', color: 'red' });
+      } else {
+        console.error('Error adding player:', error);
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    setPlayersRefresh((prev) => !prev);  // Refresh the player list
+    setPlayersRefresh((prev) => !prev);
   };  
 
   // Handle removing a player
@@ -53,11 +62,18 @@ export const usePlayerManagement = () => {
       await removePlayer(playerId);
       showNotification({ message: 'Player removed successfully!', color: 'green' });
       setRemoveModalOpened(false);
-    } catch (error) {
-      console.error('Error removing player:', error);
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        setAuthenticated(false);
+        localStorage.removeItem('authenticated');
+        showNotification({ message: 'Session expired. Please log in again.', color: 'red' });
+      } else {
+        console.error('Error adding player:', error);
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    setPlayersRefresh((prev) => !prev);  // Refresh the player list
+    setPlayersRefresh((prev) => !prev);
   };
 
   // Handle permanently deleting a player and related games
@@ -70,12 +86,18 @@ export const usePlayerManagement = () => {
       showNotification({ message: 'Player and related games deleted successfully!', color: 'green' });
       setDeleteModalOpened(false);
       setPlayersRefresh((prev) => !prev);  // Refresh the player list
-    } catch (error) {
-      console.error('Error deleting player:', error);
-      showNotification({ message: 'Error deleting player', color: 'red' });
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        setAuthenticated(false);
+        localStorage.removeItem('authenticated');
+        showNotification({ message: 'Session expired. Please log in again.', color: 'red' });
+      } else {
+        console.error('Error adding player:', error);
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    setPlayersRefresh((prev) => !prev);  // Refresh the player list
+    setPlayersRefresh((prev) => !prev);
   };
 
   // Handle reactivating a player
@@ -88,12 +110,18 @@ export const usePlayerManagement = () => {
         showNotification({ message: 'Player reactivated successfully!', color: 'green' });
         setInactivePlayerId(null);  // Reset after reactivation
         setReactivateModalOpened(false);
-      } catch (error) {
-        console.error('Error reactivating player:', error);
-        showNotification({ message: 'Error reactivating player', color: 'red' });
+      } catch (error: any) {
+        if (error.response && error.response.status === 401) {
+          setAuthenticated(false);
+          localStorage.removeItem('authenticated');
+          showNotification({ message: 'Session expired. Please log in again.', color: 'red' });
+        } else {
+          console.error('Error adding player:', error);
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-      setPlayersRefresh((prev) => !prev);  // Refresh the player list
+      setPlayersRefresh((prev) => !prev);
     }
   };
 

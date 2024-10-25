@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { AppShell, Burger, Button, Group, Stack, MantineProvider, Image, NavLink } from '@mantine/core';
 import { IconPingPong, IconListNumbers, IconHome } from '@tabler/icons-react';
+import { AuthContext } from '@/AuthContext';
+import axios from 'axios';
 import { useForm } from '@mantine/form';
 import { Player } from '../types';
 
@@ -9,6 +11,7 @@ import RankingsList from '../components/RankingsList';
 import GameHistory from '../components/GameHistory';
 import AddPlayerModal from '../components/modals/AddPlayerModal';
 import AddGameResultModal from '../components/modals/AddGameResultModal';
+import LoginModal from '@/components/modals/LoginModal';
 import { ColorSchemeToggle } from '../components/toggles/ColorSchemeToggle';
 import { GitHubLink } from '@/components/toggles/GitHubLink';
 
@@ -34,6 +37,8 @@ export function HomePage() {
   const [opened, { toggle, close }] = useDisclosure();
   const [addModalOpened, setAddModalOpened] = useState(false);
   const [gameModalOpened, setGameModalOpened] = useState(false);
+  const [loginModalOpened, setLoginModalOpened] = useState(false);
+  const { authenticated, setAuthenticated } = useContext(AuthContext);
 
   // Hooks for player and game management
   const {
@@ -103,6 +108,16 @@ export function HomePage() {
     close();  // Close the burger menu
   };
 
+  const handleLogout = async () => {
+    try {
+      await axios.post('/logout');
+      setAuthenticated(false);
+      localStorage.removeItem('authenticated');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
     <MantineProvider theme={theme}>
       <AppShell
@@ -123,17 +138,27 @@ export function HomePage() {
             <Group justify="flex-end" wrap='nowrap'>
               <GitHubLink />
               <ColorSchemeToggle />
+              {authenticated ? (
+              <Button onClick={handleLogout}>
+                Sign Out
+              </Button>
+            ) : (
+              <Button onClick={() => setLoginModalOpened(true)}>
+                Sign In
+              </Button>
+            )}
             </Group>
           </Group>
         </AppShell.Header>
 
         <AppShell.Navbar p="md">
           <Stack gap="xs">
-            <Group justify="center" grow>
-              <Button onClick={() => setGameModalOpened(true)}>Add Game</Button>
-              <Button onClick={() => setAddModalOpened(true)}>Add Player</Button>
-            </Group>
-
+            {authenticated && (
+              <Group justify="center" grow>
+                <Button onClick={() => setGameModalOpened(true)}>Add Game</Button>
+                <Button onClick={() => setAddModalOpened(true)}>Add Player</Button>
+              </Group>
+            )}
             <NavLink
               label="Home"
               leftSection={<IconHome size="1rem" stroke={1.5} />}
@@ -154,6 +179,11 @@ export function HomePage() {
 
         <AppShell.Main>
           <Stack align="stretch">
+            {/* Login Modal */}
+            <LoginModal
+              opened={loginModalOpened}
+              onClose={() => setLoginModalOpened(false)}
+            />
             {/* Modals for player management and game results */}
             <AddPlayerModal
               opened={addModalOpened}

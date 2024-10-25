@@ -1,4 +1,5 @@
-import { Dispatch, SetStateAction, useState, useEffect } from 'react';
+import { Dispatch, SetStateAction, useState, useEffect, useContext } from 'react';
+import { AuthContext } from '@/AuthContext';
 import { getGameHistory, addGameResult, editGame, deleteGame } from '../services/api';
 import { showNotification } from '@mantine/notifications';
 import { Game } from '../types';
@@ -9,7 +10,7 @@ export const useGameManagement = (
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
-
+  const { setAuthenticated } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchGames = async () => {
@@ -34,7 +35,6 @@ export const useGameManagement = (
       showNotification({ message: 'A player cannot play against themselves!', color: 'red' });
       return;
     }
-
     setLoading(true);
     try {
       await addGameResult({
@@ -49,9 +49,15 @@ export const useGameManagement = (
       setRefresh((prev) => !prev);  // Trigger refresh after adding game
       setPlayersRefresh((prev) => !prev);
       console.log('Triggering players refresh after game result...');
-    } catch (error) {
-      console.error('Error adding game result:', error);
-      showNotification({ message: 'Error adding game result', color: 'red' });
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        setAuthenticated(false);
+        localStorage.removeItem('authenticated');
+        showNotification({ message: 'Session expired. Please log in again.', color: 'red' });
+      } else {
+        console.error('Error adding game result:', error);
+        showNotification({ message: 'Error adding game result', color: 'red' });
+      }
     } finally {
       setLoading(false);
     }
@@ -65,9 +71,15 @@ export const useGameManagement = (
       showNotification({ message: 'Game updated successfully!', color: 'green' });
       setRefresh((prev) => !prev);  // Trigger refresh after editing game
       setPlayersRefresh((prev) => !prev);
-    } catch (error) {
-      console.error('Error updating game result:', error);
-      showNotification({ message: 'Error updating game result', color: 'red' });
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        setAuthenticated(false);
+        localStorage.removeItem('authenticated');
+        showNotification({ message: 'Session expired. Please log in again.', color: 'red' });
+      } else {
+        console.error('Error adding game result:', error);
+        showNotification({ message: 'Error adding game result', color: 'red' });
+      }
     } finally {
       setLoading(false);
     }
@@ -81,9 +93,15 @@ export const useGameManagement = (
       showNotification({ message: 'Game deleted successfully!', color: 'green' });
       setRefresh((prev) => !prev);  // Trigger refresh after deleting game
       setPlayersRefresh((prev) => !prev);
-    } catch (error) {
-      console.error('Error deleting game:', error);
-      showNotification({ message: 'Error deleting game', color: 'red' });
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        setAuthenticated(false);
+        localStorage.removeItem('authenticated');
+        showNotification({ message: 'Session expired. Please log in again.', color: 'red' });
+      } else {
+        console.error('Error adding game result:', error);
+        showNotification({ message: 'Error adding game result', color: 'red' });
+      }
     } finally {
       setLoading(false);
     }
