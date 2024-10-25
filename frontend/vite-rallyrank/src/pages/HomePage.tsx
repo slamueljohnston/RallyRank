@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { AppShell, Burger, Button, Group, Stack, MantineProvider, Image, NavLink } from '@mantine/core';
-import { IconPingPong, IconListNumbers, IconHome } from '@tabler/icons-react';
+import { IconPingPong, IconListNumbers, IconHome, IconLogin, IconLogout } from '@tabler/icons-react';
 import { AuthContext } from '@/AuthContext';
 import axios from 'axios';
 import { useForm } from '@mantine/form';
@@ -138,15 +138,6 @@ export function HomePage() {
             <Group justify="flex-end" wrap='nowrap'>
               <GitHubLink />
               <ColorSchemeToggle />
-              {authenticated ? (
-              <Button onClick={handleLogout}>
-                Sign Out
-              </Button>
-            ) : (
-              <Button onClick={() => setLoginModalOpened(true)}>
-                Sign In
-              </Button>
-            )}
             </Group>
           </Group>
         </AppShell.Header>
@@ -174,6 +165,22 @@ export function HomePage() {
               leftSection={<IconPingPong size="1rem" stroke={1.5} />}
               onClick={() => { navigateToPage('gameHistory') }}
             />
+          </Stack>
+          <Stack mt="auto">
+            {authenticated ? (
+                <NavLink
+                  label="Sign Out"
+                  leftSection={<IconLogout size="1rem" stroke={1.5} />}
+                  onClick={handleLogout}
+                />
+              ) : (
+                <NavLink
+                  label="Sign In"
+                  leftSection={<IconLogin size="1rem" stroke={1.5} />}
+                  onClick={() => setLoginModalOpened(true)}
+                  active
+                />
+              )}
           </Stack>
         </AppShell.Navbar>
 
