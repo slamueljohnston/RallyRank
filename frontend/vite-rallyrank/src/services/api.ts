@@ -6,7 +6,7 @@ const API_BASE_URL = window.location.hostname === 'localhost'
   : 'https://rallyrank.onrender.com';  // Use production backend when deployed
 
 axios.defaults.baseURL = API_BASE_URL;
-axios.defaults.withCredentials = true;  // Add this line
+axios.defaults.withCredentials = true;
 
 export const api = axios.create();
 

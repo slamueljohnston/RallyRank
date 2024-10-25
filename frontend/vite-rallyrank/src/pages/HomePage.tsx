@@ -178,6 +178,7 @@ export function HomePage() {
                   label="Sign In"
                   leftSection={<IconLogin size="1rem" stroke={1.5} />}
                   onClick={() => setLoginModalOpened(true)}
+                  variant="filled"
                   active
                 />
               )}

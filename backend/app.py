@@ -16,6 +16,12 @@ load_dotenv()
 
 app = Flask(__name__)
 
+# Load configuration based on environment
+if os.getenv('FLASK_ENV') == 'development':
+    app.config.from_object(DevelopmentConfig)
+else:
+    app.config.from_object(ProductionConfig)
+
 # Set the secret key for session management
 app.secret_key = os.environ.get('SECRET_KEY', 'your_default_secret_key')
 
@@ -24,6 +30,7 @@ ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
 if not ADMIN_PASSWORD:
     raise ValueError("No ADMIN_PASSWORD set for Flask application. Please set it in the environment variables.")
 
+# Set up CORS based on environment
 if os.getenv('FLASK_ENV') == 'development':
     CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
 else:
@@ -32,14 +39,7 @@ else:
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
-# Determine environment
-if os.getenv('FLASK_ENV') == 'development':
-    app.config.from_object(DevelopmentConfig)
-else:
-    app.config.from_object(ProductionConfig)
-
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SECURE'] = False
+# Configure session type
 app.config['SESSION_TYPE'] = 'filesystem'
 
 # Configure PostgreSQL database
