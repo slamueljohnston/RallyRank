@@ -4,6 +4,7 @@ import { Player, Game } from '../types';
 import { StatsGrid } from '@/components/StatsGrid';
 import WinLossChart from '@/components/WinLossChart';
 import RatingHistoryChart from '@/components/RatingHistoryChart';
+import WinRateChart from '@/components/WinRateChart';
 import { calculateWinLossRecord, calculateAverageGameScore, calculateBiggestWinLoss, getRatingHistory } from '@/utils/playerStatsUtils';
 import { format } from 'date-fns';
 import { getPlayerTitle } from '@/utils/titles';
@@ -11,8 +12,8 @@ import { getPlayerTitle } from '@/utils/titles';
 interface PlayerProfileProps {
   player: Player;
   onBack: () => void;
-  players: Player[];  // Pass all players to calculate the rank dynamically
-  games: Game[];  // Pass the full list of games
+  players: Player[];
+  games: Game[];
 }
 
 const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack, players, games }) => {
@@ -54,8 +55,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack, players, 
           dates={ratingHistory.map(({ date }) => format(new Date(date), 'MMM d'))}
         />
       </SimpleGrid>
-
-      {/* TODO: Add game history table */}
+      <WinRateChart player={player} games={games} />
     </Stack>
   );
 };
